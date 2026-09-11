@@ -1,0 +1,20 @@
+{
+  "brand": {
+    "name": "EngUvers",
+    "tagline": "Your Engineering Universe"
+  },
+  "landing": {
+    "comingSoonBadge": "Coming soon",
+    "heading": "EngUvers",
+    "subheading": "A single platform for learning, hands-on practice, testing, projects, AI, and career opportunities for Arab engineering students and engineers.",
+    "journey": "Discover your track → Learn → Practice → Build projects → Test yourself → Prove your skills → Grow your career",
+    "cta": "Start your journey"
+  },
+  "theme": {
+    "light": "Light mode",
+    "dark": "Dark mode"
+  },
+  "language": {
+    "label": "Language"
+  }
+}
