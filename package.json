@@ -1,0 +1,26 @@
+{
+  "name": "enguvers",
+  "private": true,
+  "version": "0.0.0",
+  "description": "EngUvers (عالم المهندسين) — monorepo root",
+  "engines": {
+    "node": ">=20",
+    "pnpm": ">=9"
+  },
+  "packageManager": "pnpm@9.15.0",
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "db:migrate": "pnpm --filter @enguvers/api exec prisma migrate dev",
+    "db:seed": "pnpm --filter @enguvers/api exec prisma db seed",
+    "db:generate": "pnpm --filter @enguvers/api exec prisma generate"
+  },
+  "devDependencies": {
+    "turbo": "^2.3.3",
+    "typescript": "^5.7.2",
+    "prettier": "^3.4.2"
+  }
+}
