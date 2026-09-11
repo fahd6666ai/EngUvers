@@ -1,0 +1,10 @@
+{
+  "extends": "@enguvers/config/tsconfig/nestjs.json",
+  "compilerOptions": {
+    "baseUrl": "./",
+    "incremental": true,
+    "outDir": "./dist"
+  },
+  "include": ["src/**/*.ts", "prisma/seed.ts"],
+  "exclude": ["node_modules", "dist", "test"]
+}

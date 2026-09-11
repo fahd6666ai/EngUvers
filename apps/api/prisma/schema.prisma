@@ -1,0 +1,323 @@
+// EngUvers — Phase 0/1 schema. See docs/ERD.md for the diagram this
+// mirrors. Later phases (courses, exams, projects, circuit-lab saves,
+// etc.) add their own models here, referencing User/Entitlement.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  student
+  engineer
+  instructor
+  company
+  university
+  admin
+}
+
+enum Locale {
+  ar
+  en
+}
+
+enum PlanCode {
+  free
+  student_pro
+  engineer_pro
+  university
+  enterprise
+}
+
+enum EntitlementSource {
+  subscription
+  voucher
+  admin_grant
+}
+
+enum EntitlementStatus {
+  active
+  expired
+  revoked
+}
+
+enum VoucherStatus {
+  unused
+  activated
+  revoked
+}
+
+enum PaymentProvider {
+  voucher
+  stripe
+  regional_gateway
+}
+
+enum PaymentStatus {
+  pending
+  succeeded
+  failed
+  refunded
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String?   @unique
+  phone         String?   @unique
+  passwordHash  String?
+  oauthProvider String?
+  role          Role      @default(student)
+  locale        Locale    @default(ar)
+  countryId     String?
+  country       Country?  @relation(fields: [countryId], references: [id])
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  profile      Profile?
+  skills       UserSkill[]
+  badges       UserBadge[]
+  entitlements Entitlement[]
+  transactions PaymentTransaction[]
+  activatedVouchers Voucher[] @relation("VoucherActivatedBy")
+  auditLogs    AuditLog[]
+
+  @@map("users")
+}
+
+model Profile {
+  id           String   @id @default(cuid())
+  userId       String   @unique
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  displayName  String?
+  avatarUrl    String?
+  bio          String?
+  universityId String?
+  university   University? @relation(fields: [universityId], references: [id])
+  majorId      String?
+  major        Major?   @relation(fields: [majorId], references: [id])
+  studyYear    Int?
+  updatedAt    DateTime @updatedAt
+
+  @@map("profiles")
+}
+
+model Country {
+  id     String @id @default(cuid())
+  code   String @unique
+  nameAr String
+  nameEn String
+
+  universities University[]
+  users        User[]
+
+  @@map("countries")
+}
+
+model University {
+  id        String  @id @default(cuid())
+  countryId String
+  country   Country @relation(fields: [countryId], references: [id])
+  nameAr    String
+  nameEn    String
+
+  faculties Faculty[]
+  profiles  Profile[]
+
+  @@map("universities")
+}
+
+model Faculty {
+  id           String     @id @default(cuid())
+  universityId String
+  university   University @relation(fields: [universityId], references: [id])
+  nameAr       String
+  nameEn       String
+
+  majors Major[]
+
+  @@map("faculties")
+}
+
+model Major {
+  id        String   @id @default(cuid())
+  facultyId String?
+  faculty   Faculty? @relation(fields: [facultyId], references: [id])
+  nameAr    String
+  nameEn    String
+
+  curricula Curriculum[]
+  profiles  Profile[]
+
+  @@map("majors")
+}
+
+model Subject {
+  id            String  @id @default(cuid())
+  nameAr        String
+  nameEn        String
+  disciplineTag String
+
+  curricula Curriculum[]
+
+  @@map("subjects")
+}
+
+model Curriculum {
+  id        String  @id @default(cuid())
+  majorId   String
+  major     Major   @relation(fields: [majorId], references: [id])
+  studyYear Int
+  subjectId String
+  subject   Subject @relation(fields: [subjectId], references: [id])
+
+  @@unique([majorId, studyYear, subjectId])
+  @@map("curricula")
+}
+
+model Plan {
+  id         String   @id @default(cuid())
+  code       PlanCode @unique
+  nameAr     String
+  nameEn     String
+  priceModel Json
+
+  entitlements  Entitlement[]
+  voucherBatches VoucherBatch[]
+  limits        PlanLimit[]
+
+  @@map("plans")
+}
+
+model PlanLimit {
+  id         String @id @default(cuid())
+  planId     String
+  plan       Plan   @relation(fields: [planId], references: [id])
+  feature    String
+  dailyQuota Int?
+
+  @@unique([planId, feature])
+  @@map("plan_limits")
+}
+
+model Entitlement {
+  id        String            @id @default(cuid())
+  userId    String
+  user      User              @relation(fields: [userId], references: [id])
+  planId    String
+  plan      Plan              @relation(fields: [planId], references: [id])
+  source    EntitlementSource
+  status    EntitlementStatus @default(active)
+  startsAt  DateTime          @default(now())
+  endsAt    DateTime?
+  createdAt DateTime          @default(now())
+
+  @@index([userId, status])
+  @@map("entitlements")
+}
+
+model VoucherBatch {
+  id        String   @id @default(cuid())
+  planId    String
+  plan      Plan     @relation(fields: [planId], references: [id])
+  quantity  Int
+  createdBy String
+  createdAt DateTime @default(now())
+
+  vouchers Voucher[]
+
+  @@map("voucher_batches")
+}
+
+model Voucher {
+  id               String        @id @default(cuid())
+  batchId          String
+  batch            VoucherBatch  @relation(fields: [batchId], references: [id])
+  codeHash         String        @unique
+  status           VoucherStatus @default(unused)
+  activatedByUserId String?
+  activatedByUser  User?         @relation("VoucherActivatedBy", fields: [activatedByUserId], references: [id])
+  activatedAt      DateTime?
+  createdAt        DateTime      @default(now())
+
+  @@map("vouchers")
+}
+
+model PaymentTransaction {
+  id          String          @id @default(cuid())
+  userId      String
+  user        User            @relation(fields: [userId], references: [id])
+  provider    PaymentProvider
+  amount      Decimal
+  currency    String
+  status      PaymentStatus   @default(pending)
+  externalRef String?
+  createdAt   DateTime        @default(now())
+
+  @@map("payment_transactions")
+}
+
+model Skill {
+  id            String @id @default(cuid())
+  nameAr        String
+  nameEn        String
+  disciplineTag String
+
+  userSkills UserSkill[]
+
+  @@map("skills")
+}
+
+model UserSkill {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  skillId   String
+  skill     Skill    @relation(fields: [skillId], references: [id])
+  points    Int      @default(0)
+  level     Int      @default(1)
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, skillId])
+  @@map("user_skills")
+}
+
+model Badge {
+  id       String @id @default(cuid())
+  code     String @unique
+  nameAr   String
+  nameEn   String
+  criteria Json
+
+  userBadges UserBadge[]
+
+  @@map("badges")
+}
+
+model UserBadge {
+  id       String   @id @default(cuid())
+  userId   String
+  user     User     @relation(fields: [userId], references: [id])
+  badgeId  String
+  badge    Badge    @relation(fields: [badgeId], references: [id])
+  earnedAt DateTime @default(now())
+
+  @@unique([userId, badgeId])
+  @@map("user_badges")
+}
+
+model AuditLog {
+  id           String   @id @default(cuid())
+  actorUserId  String?
+  actor        User?    @relation(fields: [actorUserId], references: [id])
+  action       String
+  entityType   String
+  entityId     String
+  metadata     Json?
+  createdAt    DateTime @default(now())
+
+  @@map("audit_logs")
+}

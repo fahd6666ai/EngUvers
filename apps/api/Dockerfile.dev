@@ -1,0 +1,16 @@
+# Dev-only image: installs the whole workspace, generates the Prisma
+# client, applies migrations, seeds reference data, then runs Nest in
+# watch mode. Source is bind-mounted by docker-compose for hot reload.
+FROM node:20-alpine
+
+RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
+
+WORKDIR /repo
+COPY . .
+RUN pnpm install --frozen-lockfile=false
+
+WORKDIR /repo/apps/api
+RUN chmod +x docker-entrypoint.dev.sh
+
+EXPOSE 4000
+CMD ["./docker-entrypoint.dev.sh"]
