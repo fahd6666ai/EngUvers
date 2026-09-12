@@ -1,0 +1,5 @@
+# Extra Python deps our backend overlay (bridge-overlay/backend/pro/)
+# needs, installed on top of the submodule's own backend/requirements.txt
+# at Docker build time — same pattern its own comment describes for a
+# private pro overlay.
+PyJWT>=2.8.0,<3
