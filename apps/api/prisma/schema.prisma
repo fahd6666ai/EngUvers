@@ -84,6 +84,7 @@ model User {
   transactions PaymentTransaction[]
   activatedVouchers Voucher[] @relation("VoucherActivatedBy")
   auditLogs    AuditLog[]
+  circuitProjects CircuitProject[]
 
   @@map("users")
 }
@@ -331,6 +332,28 @@ model PhoneOtp {
 
   @@index([phone])
   @@map("phone_otps")
+}
+
+// Phase 2 — Circuit Lab (Velxio). One row per saved circuit workspace;
+// `vlxContent` is the whole .vlx JSON payload (see
+// services/simulator/bridge-overlay/frontend's PROJECT_CHANGED/PROJECT_DATA
+// messages) — the same format Velxio's own .vlx export/import uses, so a
+// project round-trips as a file too. `version` is a plain optimistic
+// counter bumped on every autosave, not a version-history table (Phase 2
+// scope doesn't need one).
+model CircuitProject {
+  id           String   @id @default(cuid())
+  ownerId      String
+  owner        User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  name         String
+  vlxContent   Json
+  thumbnailUrl String?
+  version      Int      @default(1)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([ownerId])
+  @@map("circuit_projects")
 }
 
 model AuditLog {

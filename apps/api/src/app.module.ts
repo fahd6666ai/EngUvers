@@ -9,6 +9,7 @@ import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { AcademicModule } from './academic/academic.module';
 import { DashboardModule } from './dashboard/dashboard.module';
+import { CircuitLabModule } from './circuit-lab/circuit-lab.module';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 
 @Module({
@@ -28,6 +29,7 @@ import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
     UsersModule,
     AcademicModule,
     DashboardModule,
+    CircuitLabModule,
   ],
   controllers: [AppController],
   providers: [{ provide: APP_GUARD, useClass: JwtAuthGuard }],
