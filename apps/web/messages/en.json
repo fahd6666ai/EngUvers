@@ -101,6 +101,23 @@
     },
     "skillsTitle": "Your skills",
     "skillsEmpty": "No skills tracked yet — they'll show up once the project lab and exams launch.",
-    "editProfile": "Edit profile"
+    "editProfile": "Edit profile",
+    "openLab": "Open Project Lab"
+  },
+  "lab": {
+    "title": "Project Lab",
+    "newProject": "New project",
+    "empty": "No projects yet — create your first circuit project.",
+    "notFound": "Project not found, or you don't have access to it.",
+    "status": "Status:",
+    "saving": "Saving...",
+    "saved": "Saved",
+    "running": "Running",
+    "stopped": "Stopped",
+    "explainError": "Explain my error (coming soon)",
+    "publishToPortfolio": "Publish to portfolio (coming soon)",
+    "serialMonitor": "Serial Monitor",
+    "mobileNotice": "The circuit simulator works best on a larger screen — try opening this page on a computer or tablet.",
+    "poweredBy": "This lab is built on"
   }
 }

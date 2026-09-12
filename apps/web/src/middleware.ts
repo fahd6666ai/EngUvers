@@ -8,7 +8,7 @@ const intlMiddleware = createMiddleware(routing);
 // protected pages before a flash of protected UI. It is NOT the security
 // boundary — every API request is authorized server-side by the API's
 // JwtAuthGuard regardless of what this middleware does.
-const PROTECTED_SEGMENTS = ['dashboard'];
+const PROTECTED_SEGMENTS = ['dashboard', 'lab'];
 
 export default function middleware(request: NextRequest) {
   const segments = request.nextUrl.pathname.split('/').filter(Boolean);

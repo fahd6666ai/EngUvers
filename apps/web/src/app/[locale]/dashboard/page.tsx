@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
-import { Badge, Card } from '@enguvers/ui';
-import { useRouter } from '@/i18n/navigation';
+import { Badge, Button, Card } from '@enguvers/ui';
+import { Link, useRouter } from '@/i18n/navigation';
 import { apiClient, ApiError } from '@/lib/api-client';
 import { clearToken, getToken } from '@/lib/auth-token';
 
@@ -67,9 +67,12 @@ export default function DashboardPage() {
             </p>
           )}
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <span className="text-sm text-slate-500">{t('yourPlan')}</span>
           <Badge variant="brand">{planCode}</Badge>
+          <Link href="/lab">
+            <Button size="sm">{t('openLab')}</Button>
+          </Link>
         </div>
       </div>
 
