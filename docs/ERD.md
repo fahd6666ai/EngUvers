@@ -34,6 +34,12 @@ erDiagram
     Badge ||--o{ UserBadge : "tracked via"
 
     User ||--o{ AuditLog : "acts as"
+
+    PhoneOtp {
+        string phone
+        string codeHash
+        datetime expiresAt
+    }
 ```
 
 ## Notes
@@ -41,13 +47,24 @@ erDiagram
 - **`Entitlement` is the single gate** every feature route/UI checks
   (`entitlements.can(userId, 'circuit_lab.esp32')`). No feature branches on
   `user.plan === 'x'` directly — see `packages/types/src/index.ts` for the
-  `EntitlementFeature` union and `PlanLimit` shape.
+  `EntitlementFeature` union and `PlanLimit` shape. Implemented for real in
+  Phase 1: `EntitlementsService`, `EntitlementsGuard` +
+  `@RequireEntitlement()`, `GET /me/entitlements`. No feature route uses
+  the guard yet — the gated features (circuit lab, academy, exams, ...)
+  start in Phase 2+.
 - **`Major`/`University`/`Faculty` are optional on `Profile`** — the
   onboarding flow's "browse generally" path (brief §5) leaves them null;
   content that isn't curriculum-bound is not tied to any of these.
+  `Major.disciplineTag` + `Major.nameEn @unique` were added in Phase 1
+  (all seeded majors are generic/faculty-less, see `prisma/seed.ts`).
 - **`Voucher.codeHash`**, never the plaintext code, is stored — the plain
   code is shown once at generation/redemption time only.
 - **`AuditLog`** is generic (`entityType` + `entityId` + `metadata` JSON)
   so it doesn't need a new column set per phase; every admin-affecting
   action (voucher batch creation, entitlement grants, content moderation)
   writes here.
+- **`PhoneOtp`** (added Phase 1): short-lived phone-verification codes,
+  hashed at rest, consumed on first correct match. The SMS side is a
+  swappable `OtpProvider` (`apps/api/src/auth/otp/`) — the dev default
+  (`ConsoleOtpProvider`) logs the code instead of sending it, since no
+  real SMS gateway is configured yet (see CLAUDE.md's deferred inputs).
