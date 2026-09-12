@@ -1,11 +1,10 @@
 # EngUvers local dev stack — one command brings up everything:
 #   docker compose up --build
-# apps/web -> http://localhost:3000
-# apps/api -> http://localhost:4000 (health: /health)
+# apps/web    -> http://localhost:3000
+# apps/api    -> http://localhost:4000 (health: /health)
+# simulator   -> http://localhost:5080 (health: /health) — Circuit Lab (Velxio)
 #
-# services/ai and services/simulator are not wired in here yet — they are
-# scaffolded as placeholders (see their README.md) and join this file in
-# Phase 4 / Phase 2 respectively.
+# services/ai is not wired in here yet — placeholder until Phase 4.
 services:
   postgres:
     image: postgres:16-alpine
@@ -103,6 +102,7 @@ services:
       - api
     environment:
       NEXT_PUBLIC_API_URL: http://localhost:4000
+      NEXT_PUBLIC_SIMULATOR_URL: http://localhost:5080
     ports:
       - "3000:3000"
     volumes:
@@ -111,6 +111,21 @@ services:
       - web-app-node-modules:/repo/apps/web/node_modules
       - ui-node-modules:/repo/packages/ui/node_modules
       - types-node-modules:/repo/packages/types/node_modules
+
+  simulator:
+    build:
+      context: .
+      dockerfile: services/simulator/Dockerfile
+      args:
+        VITE_ENGUVERS_ORIGIN: ${WEB_ORIGIN:-http://localhost:3000}
+    restart: unless-stopped
+    ports:
+      - "5080:80"
+    volumes:
+      # Arduino core installs + build cache persist across restarts —
+      # without this every restart re-downloads arduino:avr/rp2040:rp2040.
+      - simulator-arduino:/root/.arduino15
+      - simulator-arduino-user:/root/Arduino
 
 volumes:
   postgres-data:
@@ -122,3 +137,5 @@ volumes:
   web-app-node-modules:
   ui-node-modules:
   types-node-modules:
+  simulator-arduino:
+  simulator-arduino-user:
