@@ -127,6 +127,7 @@ model University {
   faculties Faculty[]
   profiles  Profile[]
 
+  @@unique([countryId, nameEn])
   @@map("universities")
 }
 
@@ -139,6 +140,7 @@ model Faculty {
 
   majors Major[]
 
+  @@unique([universityId, nameEn])
   @@map("faculties")
 }
 
@@ -146,8 +148,13 @@ model Major {
   id        String   @id @default(cuid())
   facultyId String?
   faculty   Faculty? @relation(fields: [facultyId], references: [id])
-  nameAr    String
-  nameEn    String
+  // Globally unique for now: every seeded major in Phase 1 is generic
+  // (facultyId null, the brief §1 discipline list). A university-specific
+  // major catalog, if ever needed, would need a different uniqueness
+  // scope than this.
+  nameEn        String @unique
+  nameAr        String
+  disciplineTag String
 
   curricula Curriculum[]
   profiles  Profile[]
@@ -307,6 +314,23 @@ model UserBadge {
 
   @@unique([userId, badgeId])
   @@map("user_badges")
+}
+
+// Phase 1 — phone OTP verification codes. Dev-mode provider logs the code
+// instead of sending an SMS (see src/auth/otp/console-otp.provider.ts);
+// swap the provider when a real SMS gateway is chosen, this table doesn't
+// change.
+model PhoneOtp {
+  id         String    @id @default(cuid())
+  phone      String
+  codeHash   String
+  expiresAt  DateTime
+  consumedAt DateTime?
+  attempts   Int       @default(0)
+  createdAt  DateTime  @default(now())
+
+  @@index([phone])
+  @@map("phone_otps")
 }
 
 model AuditLog {
