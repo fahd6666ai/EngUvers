@@ -1,4 +1,4 @@
-# EngUvers — Page / Route Map (Phase 0-1 scope)
+# EngUvers — Page / Route Map (Phase 0-2 scope)
 
 All routes are locale-prefixed (`next-intl`, `localePrefix: 'always'`):
 `/[locale]/...` with `ar` as the default and RTL, `en` as secondary and
@@ -16,7 +16,9 @@ their own routes when their phase starts — not designed here.
 | `/[locale]/auth/verify-otp` | OTP verification | ✅ Phase 1 | Reads `?phone=`, dev-mode code echoed by the API response (no real SMS gateway configured) |
 | `/[locale]/dashboard` | User dashboard | ✅ Phase 1 | `GET /me/dashboard`: profile, plan badge, skills (empty until Phase 2+), journey checklist. Protected by `middleware.ts` (cookie presence) + the API's `JwtAuthGuard` |
 | `/[locale]/settings/billing` | Billing | Phase 6 | Plan, voucher redemption, payment history — moved out of Phase 1; no functional payment system exists yet to back a shell |
-| `/[locale]/lab/circuits/[projectId]` | Circuit Lab | Phase 2 | Velxio iframe + Arabic side panel (instructions, "explain my error", save, publish to portfolio) |
+| `/[locale]/lab` | Project Lab shell | ✅ Phase 2 | Lists the user's circuit projects (`GET /circuit-projects`), "New project" CTA |
+| `/[locale]/lab/circuits/new` | Create + redirect | ✅ Phase 2 | `POST /circuit-projects` (seeded with a Blink-on-Uno starter), redirects into the editor |
+| `/[locale]/lab/circuits/[projectId]` | Circuit Lab | ✅ Phase 2 | Velxio iframe (LTR, its own UI has no Arabic locale) + Arabic side panel (save status, run status, serial monitor, AGPL source link). "Explain my error" and "publish to portfolio" are visible but disabled — Phases 4 and 5 |
 
 Not yet mapped (designed at the start of their phase): Engineering Books
 (EB), Engineering Academy (EA), Engineering Exams (EE), Engineering AI

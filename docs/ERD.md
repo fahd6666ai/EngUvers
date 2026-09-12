@@ -1,4 +1,4 @@
-# EngUvers — Entity Relationship Diagram (Phase 0-1 scope)
+# EngUvers — Entity Relationship Diagram (Phase 0-2 scope)
 
 Source of truth for the actual schema is
 [`apps/api/prisma/schema.prisma`](../apps/api/prisma/schema.prisma) — this
@@ -34,6 +34,13 @@ erDiagram
     Badge ||--o{ UserBadge : "tracked via"
 
     User ||--o{ AuditLog : "acts as"
+    User ||--o{ CircuitProject : owns
+
+    CircuitProject {
+        string name
+        json vlxContent
+        int version
+    }
 
     PhoneOtp {
         string phone
@@ -68,3 +75,10 @@ erDiagram
   swappable `OtpProvider` (`apps/api/src/auth/otp/`) — the dev default
   (`ConsoleOtpProvider`) logs the code instead of sending it, since no
   real SMS gateway is configured yet (see CLAUDE.md's deferred inputs).
+- **`CircuitProject`** (added Phase 2): one row per saved Circuit Lab
+  workspace. `vlxContent` is the whole `.vlx` JSON payload — the same
+  format Velxio's own file export/import uses (see
+  `services/simulator/README.md`), so a project round-trips as a
+  downloadable file too, not just through the app. `version` is a plain
+  optimistic counter bumped on every autosave — not a version-history
+  table (no phase needs one yet).

@@ -25,7 +25,7 @@ enguvers/
 │   └── mobile/        placeholder — Phase 8
 ├── services/
 │   ├── ai/            placeholder — Phase 4 (FastAPI, Claude API via LLMProvider)
-│   └── simulator/      placeholder — Phase 2 (Velxio fork + Bridge overlay)
+│   └── simulator/      Circuit Lab (Velxio, Phase 2) — see its own README.md
 ├── packages/
 │   ├── config/        shared eslint / tsconfig / tailwind preset
 │   ├── types/         shared domain types (Role, PlanCode, Entitlement*, ...)
@@ -47,10 +47,14 @@ pnpm install
 # either via `docker compose up postgres redis` or your own instances)
 pnpm dev
 
-# Whole stack in Docker (web, api, postgres, redis, minio, meilisearch)
+# Whole stack in Docker (web, api, postgres, redis, minio, meilisearch, simulator)
 docker compose up --build
-# web  -> http://localhost:3000
-# api  -> http://localhost:4000  (health: GET /health)
+# web       -> http://localhost:3000
+# api       -> http://localhost:4000  (health: GET /health)
+# simulator -> http://localhost:5080  (health: GET /health) — Circuit Lab
+
+# First-time submodule checkout (Velxio, pinned — see docs/LICENSING.md)
+git submodule update --init --recursive
 
 # Quality gates (turbo runs these per-package; a package without the
 # script is skipped, not failed)
@@ -84,13 +88,18 @@ pnpm db:seed          # prisma db seed (reference data only — see prisma/seed.
   `if (user.plan === 'pro')`. `packages/types` defines the
   `EntitlementFeature` union and `PlanLimit` shape shared by both apps.
 - **Circuit Lab (Velxio)**: runs as a fully separate service
-  (`services/simulator`, Phase 2), never vendored into `apps/web`/`apps/api`.
-  Our fork is a submodule pinned to a commit SHA; the integration ("the
-  Bridge") is built entirely on Velxio's own extension seams
-  (`backend/app/core/hooks.py`, `proSaveAction.ts`, `proSession.ts`,
-  `proRoutes.ts`) — confirmed by reading the actual Velxio source during
-  Phase 0 planning, not assumed. See `docs/LICENSING.md` and
-  `services/simulator/README.md`.
+  (`services/simulator`), never vendored into `apps/web`/`apps/api`. The
+  Phase 0 plan assumed we'd need our own fork; Phase 2 found something
+  better while implementing it — Velxio ships an official, zero-
+  modification extension mechanism (a build-time `@pro` alias for the
+  frontend, an auto-loaded `backend/app/pro/` package for the backend;
+  the same mechanism its own author uses to build the closed-source
+  `velxio-prod`). So: **no fork** — `services/simulator/velxio` is a git
+  submodule pointing straight at upstream, pinned to one commit SHA, byte-
+  for-byte unmodified. The entire Bridge lives in
+  `services/simulator/bridge-overlay/` (this repo) and is injected only
+  at Docker build time. See `docs/LICENSING.md` (full rationale) and
+  `services/simulator/README.md` (what's implemented vs. deferred).
 - **No secrets in code**: everything sensitive is an env var; see
   `.env.example` (root, for docker-compose) and `apps/api/.env.example`
   (for running `apps/api` outside Docker).
@@ -167,5 +176,52 @@ pnpm db:seed          # prisma db seed (reference data only — see prisma/seed.
     engineering faculty each) plus the generic discipline-level majors;
     growing this catalog is ongoing content work, not a Phase 2 blocker.
 
-Next phase to implement: **Phase 2** — Circuit Lab (Velxio fork + Bridge)
-and the Project Lab shell.
+- **Phase 2 (current)** — Circuit Lab. `services/simulator/velxio` added
+  as a git submodule pinned to `c4bbb08569e7f4089abfc631714f9dea40bb328e`
+  (unmodified — see the Circuit Lab architecture decision above and
+  `docs/LICENSING.md`). `services/simulator/bridge-overlay/` implements
+  the postMessage bridge (frontend: `mountPro()`, save-action override,
+  store-subscription-driven `PROJECT_CHANGED`/`SIM_STATE`/`SERIAL_OUTPUT`/
+  `COMPILE_RESULT`; backend: `register_pro()` wiring
+  `get_current_user_id`/`record_compile`) and `services/simulator/
+  Dockerfile` builds it (arduino-cli lane only — AVR + RP2040, no ESP32/
+  Pi/QEMU this phase). API: `CircuitProject` model, `circuit-lab` module
+  (create/get/patch-autosave, short-lived per-project session tokens).
+  Web: `/lab` (Project Lab shell/list), `/lab/circuits/new`,
+  `/lab/circuits/[projectId]` (iframe + Arabic side panel, AGPL source
+  link). **Verified end-to-end natively** (all four services — Velxio
+  backend/frontend, apps/api, apps/web — run side by side, driven with
+  Playwright): register → create project → Blink starter loads into
+  Monaco via `LOAD_PROJECT` → edit → debounced `PROJECT_CHANGED` autosave
+  confirmed via a direct API check → close and reopen loads the *edited*
+  content, not the original starter. Two real bugs this caught and fixed:
+  a board-id/file-group-id mismatch in the starter project (Velxio derives
+  a board's group id as `group-${boardId}`; the starter used a mismatched
+  id and orphaned its own file content) and a suppression-timing race in
+  the bridge (a guard meant to swallow the load's own echo was set after
+  the store notifications it needed to catch had already fired). Not
+  verified: an actual compile/run of Blink (avr8js simulation) —
+  `arduino-cli`'s installer needs `github.com/arduino/arduino-cli/releases`
+  and an arduino.cc download host, both outside this session's egress
+  allowlist; full `docker compose` build is separately blocked by the same
+  Docker Hub restriction as Phase 0. See `services/simulator/README.md`
+  for the complete verification log.
+
+  Deferred inputs / known gaps (see services/simulator/README.md for
+  full detail):
+  - `COMPILE_RESULT` relays success only — a compile failure isn't
+    mirrored to the parent page yet (would need touching Velxio core UI
+    code, which the "zero modification" rule above forbids without a
+    deliberate escalation).
+  - `SET_READONLY`/`SET_ALLOWED_BOARDS` are accepted but not enforced in
+    the simulator's own UI.
+  - No ESP32/Pi boards, no compile-quota enforcement (no `circuit_lab.*`
+    `PlanLimit` row exists yet — seeded when a paid tier actually needs
+    one).
+  - Docker Hub base-image pulls (`node:20-slim`, `python:3.12-slim`) are
+    blocked in this sandbox; the Dockerfile's individual steps were all
+    validated natively instead. Should build fine wherever Docker Hub is
+    reachable.
+
+Next phase to implement: **Phase 3** — EB + EA + EE (content, courses,
+exams) with a content-admin panel.
