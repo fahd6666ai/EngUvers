@@ -3,12 +3,27 @@
     "name": "EngUvers",
     "tagline": "Your Engineering Universe"
   },
+  "nav": {
+    "login": "Log in",
+    "register": "Sign up",
+    "dashboard": "Dashboard",
+    "logout": "Log out"
+  },
   "landing": {
-    "comingSoonBadge": "Coming soon",
+    "heroBadge": "Coming soon — the first release is in progress",
     "heading": "EngUvers",
     "subheading": "A single platform for learning, hands-on practice, testing, projects, AI, and career opportunities for Arab engineering students and engineers.",
-    "journey": "Discover your track → Learn → Practice → Build projects → Test yourself → Prove your skills → Grow your career",
-    "cta": "Start your journey"
+    "ctaPrimary": "Start your journey",
+    "ctaSecondary": "I already have an account",
+    "journeyTitle": "Your journey through EngUvers",
+    "journey": {
+      "discover": { "title": "Discover your track", "desc": "Pick your field: electrical, mechanical, mechatronics, communications, software, AI, or robotics." },
+      "learn": { "title": "Learn", "desc": "Books, courses, and references organized by discipline and curriculum." },
+      "build": { "title": "Build projects", "desc": "Apply what you learn in a real project lab, including circuit and embedded-systems simulation." },
+      "prove": { "title": "Prove your skills", "desc": "Auto-graded tests and challenges build your skills profile, points, and badges." },
+      "grow": { "title": "Grow as an engineer", "desc": "A shareable portfolio, internship and job opportunities, and an AI mock interview." }
+    },
+    "disciplinesTitle": "Available disciplines"
   },
   "theme": {
     "light": "Light mode",
@@ -16,5 +31,76 @@
   },
   "language": {
     "label": "Language"
+  },
+  "onboarding": {
+    "language": {
+      "title": "Choose your language",
+      "subtitle": "You can change it anytime later.",
+      "arabic": "العربية",
+      "english": "English"
+    },
+    "country": {
+      "title": "Where are you from?",
+      "subtitle": "So we can show content and universities relevant to your country.",
+      "loading": "Loading countries...",
+      "continue": "Continue",
+      "skip": "Browse generally without a country"
+    },
+    "academic": {
+      "title": "Your university and major",
+      "subtitle": "So we can show a matching curriculum, or skip this step and explore freely.",
+      "universityLabel": "University (optional)",
+      "noUniversity": "No specific university",
+      "majorLabel": "Major",
+      "chooseMajor": "Choose a major",
+      "studyYearLabel": "Study year (optional)",
+      "finish": "Finish setup",
+      "skip": "Skip this step"
+    }
+  },
+  "auth": {
+    "emailTab": "Email",
+    "phoneTab": "Phone",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm password",
+    "phone": "Phone number (e.g. +9665xxxxxxxx)",
+    "otpCode": "Verification code",
+    "requestOtp": "Send verification code",
+    "verifyOtp": "Verify and continue",
+    "otpSentDev": "A verification code was generated (dev mode, no real SMS gateway yet):",
+    "googleComingSoon": "Continue with Google (coming soon)",
+    "login": {
+      "title": "Log in",
+      "submit": "Log in",
+      "noAccount": "Don't have an account?",
+      "registerLink": "Create one"
+    },
+    "register": {
+      "title": "Create an account",
+      "submit": "Create account",
+      "haveAccount": "Already have an account?",
+      "loginLink": "Log in"
+    },
+    "errors": {
+      "generic": "Something went wrong, please try again.",
+      "passwordMismatch": "Passwords do not match."
+    }
+  },
+  "dashboard": {
+    "welcome": "Welcome",
+    "yourPlan": "Your current plan",
+    "journeyTitle": "Your journey progress",
+    "journey": {
+      "onboardingCompleted": "Completed initial setup",
+      "completedFirstCourse": "Completed your first course",
+      "submittedFirstProject": "Submitted your first project",
+      "passedFirstExam": "Passed your first exam",
+      "publishedPortfolio": "Published your portfolio",
+      "appliedToOpportunity": "Applied to an opportunity"
+    },
+    "skillsTitle": "Your skills",
+    "skillsEmpty": "No skills tracked yet — they'll show up once the project lab and exams launch.",
+    "editProfile": "Edit profile"
   }
 }
