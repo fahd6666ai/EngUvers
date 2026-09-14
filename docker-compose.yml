@@ -3,8 +3,10 @@
 # apps/web    -> http://localhost:3000
 # apps/api    -> http://localhost:4000 (health: /health)
 # simulator   -> http://localhost:5080 (health: /health) — Circuit Lab (Velxio)
-#
-# services/ai is not wired in here yet — placeholder until Phase 4.
+# ai          -> http://localhost:4100 (health: /health) — Engineering AI (EAI),
+#                answers with real LLM output only once ANTHROPIC_API_KEY +
+#                ANTHROPIC_MODEL are set in .env; otherwise every LLM-backed
+#                route honestly 503s (see services/ai/README.md).
 services:
   postgres:
     image: postgres:16-alpine
@@ -111,6 +113,21 @@ services:
       - web-app-node-modules:/repo/apps/web/node_modules
       - ui-node-modules:/repo/packages/ui/node_modules
       - types-node-modules:/repo/packages/types/node_modules
+
+  ai:
+    build:
+      context: ./services/ai
+      dockerfile: Dockerfile.dev
+    restart: unless-stopped
+    environment:
+      JWT_SECRET: ${JWT_SECRET:-change-me-in-production}
+      AI_PORT: 4100
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      ANTHROPIC_MODEL: ${ANTHROPIC_MODEL:-}
+    ports:
+      - "4100:4100"
+    volumes:
+      - ./services/ai:/app
 
   simulator:
     build:
