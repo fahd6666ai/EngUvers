@@ -2,6 +2,7 @@ import { ForbiddenException, NotFoundException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { CircuitLabService } from './circuit-lab.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { UnavailableIseAnalysisProvider } from './ise-analysis/unavailable-ise-analysis.provider';
 
 describe('CircuitLabService', () => {
   let service: CircuitLabService;
@@ -26,6 +27,7 @@ describe('CircuitLabService', () => {
     service = new CircuitLabService(
       prisma as unknown as PrismaService,
       new JwtService({ secret: 'test-secret' }),
+      new UnavailableIseAnalysisProvider(),
     );
   });
 
@@ -80,6 +82,24 @@ describe('CircuitLabService', () => {
       prisma.circuitProject.findUnique.mockResolvedValue({ id: 'p1', ownerId: 'u1' });
       const result = await service.issueSessionToken('p1', 'u1');
       expect(typeof result.token).toBe('string');
+    });
+  });
+
+  describe('explainProject', () => {
+    it('rejects explaining a project owned by someone else', async () => {
+      prisma.circuitProject.findUnique.mockResolvedValue({ id: 'p1', ownerId: 'someone-else' });
+      await expect(service.explainProject('p1', 'u1')).rejects.toBeInstanceOf(ForbiddenException);
+    });
+
+    it('delegates to the ISE analysis provider, which is unavailable until Phase 4', async () => {
+      prisma.circuitProject.findUnique.mockResolvedValue({
+        id: 'p1',
+        ownerId: 'u1',
+        vlxContent: {},
+      });
+      await expect(service.explainProject('p1', 'u1')).rejects.toThrow(
+        /not configured yet/,
+      );
     });
   });
 });
