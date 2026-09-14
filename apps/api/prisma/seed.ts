@@ -80,6 +80,17 @@ const UNIVERSITIES: Record<(typeof COUNTRIES)[number]['code'], { nameAr: string;
 
 const ENGINEERING_FACULTY = { nameAr: 'كلية الهندسة', nameEn: 'College of Engineering' };
 
+// Which plan gets which feature — the same reference-data role PLANS/
+// COUNTRIES play, not app content. `academy.courses` (Phase 3) has no
+// missing external dependency the way `ise.analysis` does, so unlike that
+// one it's granted here rather than left ungated for everyone: every
+// signed-up user gets `free`, so this is what actually turns the feature
+// on. Add a row here, not a hardcoded check, when a future phase's
+// feature needs the same treatment.
+const PLAN_LIMITS: { planCode: (typeof PLANS)[number]['code']; feature: string; dailyQuota: number | null }[] = [
+  { planCode: 'free', feature: 'academy.courses', dailyQuota: null },
+];
+
 // The disciplines from the brief's product definition (§1) — generic,
 // not tied to any university, usable from both the "browse generally"
 // onboarding path and the university-linked path alike.
@@ -137,8 +148,17 @@ async function main() {
     });
   }
 
+  for (const limit of PLAN_LIMITS) {
+    const plan = await prisma.plan.findUniqueOrThrow({ where: { code: limit.planCode } });
+    await prisma.planLimit.upsert({
+      where: { planId_feature: { planId: plan.id, feature: limit.feature } },
+      update: { dailyQuota: limit.dailyQuota },
+      create: { planId: plan.id, feature: limit.feature, dailyQuota: limit.dailyQuota },
+    });
+  }
+
   console.log(
-    `Seeded ${COUNTRIES.length} countries, ${PLANS.length} plans, ${universityCount} universities (with an engineering faculty each), and ${GENERIC_MAJORS.length} generic majors.`,
+    `Seeded ${COUNTRIES.length} countries, ${PLANS.length} plans, ${universityCount} universities (with an engineering faculty each), ${GENERIC_MAJORS.length} generic majors, and ${PLAN_LIMITS.length} plan limits.`,
   );
 }
 

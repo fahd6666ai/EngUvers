@@ -1,4 +1,4 @@
-# EngUvers — Entity Relationship Diagram (Phase 0-2 scope)
+# EngUvers — Entity Relationship Diagram (Phase 0-3 scope)
 
 Source of truth for the actual schema is
 [`apps/api/prisma/schema.prisma`](../apps/api/prisma/schema.prisma) — this
@@ -35,6 +35,13 @@ erDiagram
 
     User ||--o{ AuditLog : "acts as"
     User ||--o{ CircuitProject : owns
+    User ||--o{ Course : authors
+    User ||--o{ CourseEnrollment : enrolls
+    User ||--o{ LessonCompletion : completes
+
+    Course ||--o{ Lesson : has
+    Course ||--o{ CourseEnrollment : "enrolled via"
+    Lesson ||--o{ LessonCompletion : "completed via"
 
     CircuitProject {
         string name
@@ -46,6 +53,26 @@ erDiagram
         string phone
         string codeHash
         datetime expiresAt
+    }
+
+    Course {
+        string titleAr
+        string titleEn
+        string disciplineTag
+        CourseLevel level
+        boolean published
+    }
+
+    Lesson {
+        string titleAr
+        string titleEn
+        LessonContentType contentType
+        int order
+    }
+
+    CourseEnrollment {
+        datetime enrolledAt
+        datetime completedAt
     }
 ```
 
@@ -82,3 +109,14 @@ erDiagram
   downloadable file too, not just through the app. `version` is a plain
   optimistic counter bumped on every autosave — not a version-history
   table (no phase needs one yet).
+- **`Course`/`Lesson`/`CourseEnrollment`/`LessonCompletion`** (added
+  Phase 3, Engineering Academy/EA): a `Course` is authored by an
+  `admin`/`instructor` (role-gated content-admin routes under
+  `/admin/academy`) and becomes enrollable once `published`. A
+  `CourseEnrollment.completedAt` is stamped once every one of the
+  course's `Lesson` rows has a matching `LessonCompletion` for that user
+  — see `AcademyService.completeLesson`. Gated behind the existing
+  `academy.courses` `EntitlementFeature`, granted to the `free` plan in
+  `prisma/seed.ts` (unlike `ise.analysis`, this feature has no missing
+  external dependency, so it isn't left ungated). No quiz/exam model yet
+  — that's EE, a later Phase 3 slice.

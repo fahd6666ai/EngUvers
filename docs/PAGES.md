@@ -1,4 +1,4 @@
-# EngUvers — Page / Route Map (Phase 0-2 scope)
+# EngUvers — Page / Route Map (Phase 0-3 scope)
 
 All routes are locale-prefixed (`next-intl`, `localePrefix: 'always'`):
 `/[locale]/...` with `ar` as the default and RTL, `en` as secondary and
@@ -18,11 +18,14 @@ their own routes when their phase starts — not designed here.
 | `/[locale]/settings/billing` | Billing | Phase 6 | Plan, voucher redemption, payment history — moved out of Phase 1; no functional payment system exists yet to back a shell |
 | `/[locale]/lab` | Project Lab shell | ✅ Phase 2 | Lists the user's circuit projects (`GET /circuit-projects`), "New project" CTA |
 | `/[locale]/lab/circuits/new` | Create + redirect | ✅ Phase 2 | `POST /circuit-projects` (seeded with a Blink-on-Uno starter), redirects into the editor |
-| `/[locale]/lab/circuits/[projectId]` | Circuit Lab | ✅ Phase 2 | Velxio iframe (LTR, its own UI has no Arabic locale) + Arabic side panel (save status, run status, serial monitor, AGPL source link). "Explain my error" and "publish to portfolio" are visible but disabled — Phases 4 and 5 |
+| `/[locale]/lab/circuits/[projectId]` | Circuit Lab | ✅ Phase 2 | Velxio iframe (LTR, its own UI has no Arabic locale) + Arabic side panel (save status, run status, serial monitor, AGPL source link). "Explain my project" calls a real, entitlement-gated endpoint that currently 503s honestly (Phase 4 needs `services/ai` + an Anthropic API key — see CLAUDE.md); "publish to portfolio" is still disabled — Phase 5 |
+| `/[locale]/academy` | Course catalog | ✅ Phase 3 | Public: `GET /academy/courses` (published only) |
+| `/[locale]/academy/[courseId]` | Course detail | ✅ Phase 3 | Public course/lesson browsing; enroll and mark-lesson-complete require login + the `academy.courses` entitlement (granted to `free` on signup) |
+| `/[locale]/admin/academy` | Content-admin: course list + create | ✅ Phase 3 | Role-gated (`admin`/`instructor`) via `RolesGuard`; client-side role check is UX only, same as the auth-cookie pattern in `middleware.ts` — the API's `RolesGuard` is the real boundary |
+| `/[locale]/admin/academy/[courseId]` | Content-admin: edit course + manage lessons | ✅ Phase 3 | Publish/unpublish toggle, add/delete lessons (video or article) |
 
 Not yet mapped (designed at the start of their phase): Engineering Books
-(EB), Engineering Academy (EA), Engineering Exams (EE), Engineering AI
-(EAI) chat surface, Student Notebook, Engineering Portfolio (EP),
-Engineering Career (EC) + AI interview, project marketplace, ISE
-dashboards, university/enterprise admin consoles, content-management
-admin.
+(EB), Engineering Exams (EE), Engineering AI (EAI) chat surface, Student
+Notebook, Engineering Portfolio (EP), Engineering Career (EC) + AI
+interview, project marketplace, ISE dashboards, university/enterprise
+admin consoles.

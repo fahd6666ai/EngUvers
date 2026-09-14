@@ -64,6 +64,17 @@ enum PaymentStatus {
   refunded
 }
 
+enum CourseLevel {
+  beginner
+  intermediate
+  advanced
+}
+
+enum LessonContentType {
+  video
+  article
+}
+
 model User {
   id            String    @id @default(cuid())
   email         String?   @unique
@@ -85,6 +96,9 @@ model User {
   activatedVouchers Voucher[] @relation("VoucherActivatedBy")
   auditLogs    AuditLog[]
   circuitProjects CircuitProject[]
+  coursesAuthored   Course[]           @relation("CourseAuthor")
+  courseEnrollments CourseEnrollment[]
+  lessonCompletions LessonCompletion[]
 
   @@map("users")
 }
@@ -367,4 +381,79 @@ model AuditLog {
   createdAt    DateTime @default(now())
 
   @@map("audit_logs")
+}
+
+// Phase 3 — Engineering Academy (EA). A Course is authored by an
+// instructor/admin (content-admin routes, role-gated) and, once
+// `published`, is enrollable by anyone with the `academy.courses`
+// entitlement (granted to the `free` plan in prisma/seed.ts — this
+// feature has no missing external dependency the way ise.analysis does,
+// so it isn't gated behind a placeholder). `CourseEnrollment.completedAt`
+// is set once every one of the course's lessons has a matching
+// `LessonCompletion` row for that user — see AcademyService.
+model Course {
+  id            String      @id @default(cuid())
+  titleAr       String
+  titleEn       String
+  summaryAr     String
+  summaryEn     String
+  disciplineTag String
+  level         CourseLevel @default(beginner)
+  published     Boolean     @default(false)
+  authorId      String
+  author        User        @relation("CourseAuthor", fields: [authorId], references: [id])
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  lessons     Lesson[]
+  enrollments CourseEnrollment[]
+
+  @@index([published, disciplineTag])
+  @@map("courses")
+}
+
+model Lesson {
+  id              String            @id @default(cuid())
+  courseId        String
+  course          Course            @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  titleAr         String
+  titleEn         String
+  contentType     LessonContentType @default(article)
+  videoUrl        String?
+  bodyAr          String?
+  bodyEn          String?
+  order           Int
+  durationMinutes Int?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  completions LessonCompletion[]
+
+  @@unique([courseId, order])
+  @@map("lessons")
+}
+
+model CourseEnrollment {
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  courseId    String
+  course      Course    @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  enrolledAt  DateTime  @default(now())
+  completedAt DateTime?
+
+  @@unique([userId, courseId])
+  @@map("course_enrollments")
+}
+
+model LessonCompletion {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lessonId    String
+  lesson      Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  completedAt DateTime @default(now())
+
+  @@unique([userId, lessonId])
+  @@map("lesson_completions")
 }

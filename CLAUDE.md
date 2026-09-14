@@ -183,7 +183,7 @@ pnpm db:seed          # prisma db seed (reference data only — see prisma/seed.
     engineering faculty each) plus the generic discipline-level majors;
     growing this catalog is ongoing content work, not a Phase 2 blocker.
 
-- **Phase 2 (current)** — Circuit Lab. `services/simulator/velxio` added
+- **Phase 2** — Circuit Lab. `services/simulator/velxio` added
   as a git submodule pinned to `c4bbb08569e7f4089abfc631714f9dea40bb328e`
   (unmodified — see the Circuit Lab architecture decision above and
   `docs/LICENSING.md`). `services/simulator/bridge-overlay/` implements
@@ -237,5 +237,51 @@ pnpm db:seed          # prisma db seed (reference data only — see prisma/seed.
     validated natively instead. Should build fine wherever Docker Hub is
     reachable.
 
-Next phase to implement: **Phase 3** — EB + EA + EE (content, courses,
-exams) with a content-admin panel.
+- **Phase 3 (current) — first slice: Engineering Academy (EA)** —
+  courses. New models: `Course` (authored by `admin`/`instructor`,
+  `published` boolean gate), `Lesson` (`video` or `article`, ordered
+  within its course), `CourseEnrollment` (`completedAt` stamped once
+  every lesson has a matching completion), `LessonCompletion`. API:
+  `academy` module — public catalog (`GET /academy/courses`,
+  `GET /academy/courses/:id`), entitlement-gated enroll/complete
+  (`academy.courses`, granted to `free` in `prisma/seed.ts` — this
+  feature, unlike `ise.analysis`, has no missing external dependency, so
+  it's turned on for real rather than left as a placeholder), and a
+  role-gated (`admin`/`instructor`, via `RolesGuard` + `@Roles()` —
+  their first real use) content-admin sub-controller at `/admin/academy`
+  for course/lesson CRUD. `GET /me/dashboard`'s `completedFirstCourse`
+  is wired to real `CourseEnrollment` data instead of the Phase 1
+  placeholder `false`. Web: `/academy` (catalog), `/academy/[courseId]`
+  (lesson browsing + enroll + mark-complete, public read/gated write —
+  same split as the academic catalog), `/admin/academy` and
+  `/admin/academy/[courseId]` (the first content-admin panel: create
+  courses, publish/unpublish, add/delete lessons). Added a `Textarea`
+  primitive to `packages/ui` (course summaries, article lesson bodies)
+  — the first packages/ui addition since Phase 1's Input/Select/Card/
+  Badge.
+
+  Verified via lint + typecheck (clean across all 5 workspace packages)
+  and 15 new unit tests in `academy.service.spec.ts` (Prisma mocked),
+  42 total passing in `apps/api` — `dashboard.service.ts`'s
+  `completedFirstCourse` wiring has no dedicated test of its own; there
+  was no `dashboard.service.spec.ts` before this phase either. **Not**
+  verified end-to-end against a live stack the way Phases 1-2 were: no
+  Docker daemon was reachable in this session (same restriction as
+  Phase 0/2's image pulls), so there was no Postgres to run
+  `prisma migrate dev`, seed, or click through the catalog/enroll/admin
+  flow against. The migration
+  (`prisma/migrations/20260914213000_academy_courses/`) was instead
+  generated with `prisma migrate diff --from-schema-datamodel
+  --to-schema-datamodel --script` (a schema-to-schema diff, no database
+  required) and reviewed by hand — the same SQL `prisma migrate dev`
+  would have produced, but unexercised against a real Postgres. Running
+  `pnpm db:migrate && pnpm db:seed` then clicking through
+  `/admin/academy` → publish a course → `/academy` → enroll → complete
+  its lessons, on a real dev stack, is the first thing to do before
+  trusting this slice the way Phase 1/2's claims can be trusted.
+
+  Not yet built (later Phase 3 slices): Engineering Books (EB —
+  book/reading-material catalog), Engineering Exams (EE — question
+  banks, auto-graded attempts, `exams.full_bank` entitlement), and any
+  ownership restriction on the content-admin panel (currently any
+  `admin`/`instructor` can edit any course, not just their own).
