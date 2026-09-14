@@ -102,7 +102,8 @@
     "skillsTitle": "Your skills",
     "skillsEmpty": "No skills tracked yet — they'll show up once the project lab and exams launch.",
     "editProfile": "Edit profile",
-    "openLab": "Open Project Lab"
+    "openLab": "Open Project Lab",
+    "openAcademy": "Open Academy"
   },
   "lab": {
     "title": "Project Lab",
@@ -115,11 +116,71 @@
     "running": "Running",
     "stopped": "Stopped",
     "explainProject": "Explain my project",
-  "explainLoading": "Analyzing…",
-  "explainUnavailable": "Engineering AI analysis isn't switched on yet for this platform — coming in a later phase.",
+    "explainLoading": "Analyzing…",
+    "explainUnavailable": "Engineering AI analysis isn't switched on yet for this platform — coming in a later phase.",
     "publishToPortfolio": "Publish to portfolio (coming soon)",
     "serialMonitor": "Serial Monitor",
     "mobileNotice": "The circuit simulator works best on a larger screen — try opening this page on a computer or tablet.",
     "poweredBy": "This lab is built on"
+  },
+  "academy": {
+    "title": "Engineering Academy",
+    "subtitle": "Courses built for Arab engineering students, organized by discipline and level.",
+    "empty": "No courses published yet — check back soon.",
+    "notFound": "Course not found, or it isn't published yet.",
+    "levels": {
+      "beginner": "Beginner",
+      "intermediate": "Intermediate",
+      "advanced": "Advanced"
+    },
+    "lessonCount": "{count, plural, one {# lesson} other {# lessons}}",
+    "minutes": "{count} min",
+    "enroll": "Enroll",
+    "enrolling": "Enrolling…",
+    "courseCompleted": "Completed",
+    "lessonCompleted": "Completed",
+    "markComplete": "Mark as complete"
+  },
+  "admin": {
+    "academy": {
+      "title": "Academy content admin",
+      "forbidden": "You don't have access to the content-admin panel.",
+      "newCourse": "New course",
+      "titleAr": "Title (Arabic)",
+      "titleEn": "Title (English)",
+      "summaryAr": "Summary (Arabic)",
+      "summaryEn": "Summary (English)",
+      "disciplineTag": "Discipline",
+      "level": "Level",
+      "levels": {
+        "beginner": "Beginner",
+        "intermediate": "Intermediate",
+        "advanced": "Advanced"
+      },
+      "create": "Create course",
+      "creating": "Creating…",
+      "empty": "No courses yet — create the first one above.",
+      "published": "Published",
+      "draft": "Draft",
+      "publish": "Publish",
+      "unpublish": "Unpublish",
+      "lessonCount": "{count, plural, one {# lesson} other {# lessons}}",
+      "enrollmentCount": "{count, plural, one {# enrollment} other {# enrollments}}",
+      "lessons": "Lessons",
+      "noLessons": "No lessons yet.",
+      "addLesson": "Add lesson",
+      "deleteLesson": "Delete",
+      "contentType": "Content type",
+      "contentTypes": {
+        "video": "Video",
+        "article": "Article"
+      },
+      "videoUrl": "Video URL (embeddable)",
+      "bodyAr": "Body (Arabic)",
+      "bodyEn": "Body (English)",
+      "errors": {
+        "generic": "Something went wrong, please try again."
+      }
+    }
   }
 }

@@ -10,26 +10,29 @@ export class DashboardService {
   ) {}
 
   async getDashboard(userId: string) {
-    const [profile, skills, entitlements] = await Promise.all([
+    const [profile, skills, entitlements, completedCourseCount] = await Promise.all([
       this.prisma.profile.findUnique({
         where: { userId },
         include: { university: true, major: true },
       }),
       this.prisma.userSkill.findMany({ where: { userId }, include: { skill: true } }),
       this.entitlements.listActive(userId),
+      this.prisma.courseEnrollment.count({ where: { userId, completedAt: { not: null } } }),
     ]);
 
     return {
       profile,
       skills,
       entitlements: entitlements.map((e) => ({ planCode: e.plan.code, source: e.source, endsAt: e.endsAt })),
-      // The brief's journey (Learn → Build → Test → Prove → Grow): only the
-      // first step is real in Phase 1. The rest turn true as their phase
-      // ships (Academy/Exams in Phase 3, Project Lab in Phase 2, Portfolio
-      // in Phase 5, Career in Phase 5) — not fabricated ahead of that.
+      // The brief's journey (Learn → Build → Test → Prove → Grow):
+      // onboarding (Phase 1) and completedFirstCourse (Phase 3, Engineering
+      // Academy) are real. The rest turn true as their phase ships
+      // (Project Lab compile-quota in Phase 2's remaining gaps, Exams in
+      // Phase 3's next slice, Portfolio/Career in Phase 5) — not fabricated
+      // ahead of that.
       journeyProgress: {
         onboardingCompleted: !!profile,
-        completedFirstCourse: false,
+        completedFirstCourse: completedCourseCount > 0,
         submittedFirstProject: false,
         passedFirstExam: false,
         publishedPortfolio: false,

@@ -102,7 +102,8 @@
     "skillsTitle": "مهاراتك",
     "skillsEmpty": "لا توجد مهارات مسجّلة بعد — ستظهر هنا فور بدء مختبر المشاريع والاختبارات.",
     "editProfile": "تعديل الملف الشخصي",
-    "openLab": "افتح مختبر المشاريع"
+    "openLab": "افتح مختبر المشاريع",
+    "openAcademy": "افتح الأكاديمية"
   },
   "lab": {
     "title": "مختبر المشاريع",
@@ -115,11 +116,71 @@
     "running": "قيد التشغيل",
     "stopped": "متوقف",
     "explainProject": "اشرح لي مشروعي",
-  "explainLoading": "جارٍ التحليل…",
-  "explainUnavailable": "ميزة التحليل بالذكاء الاصطناعي لسه مش مفعّلة على المنصة — هتتوفر في مرحلة لاحقة.",
+    "explainLoading": "جارٍ التحليل…",
+    "explainUnavailable": "ميزة التحليل بالذكاء الاصطناعي غير مفعّلة على المنصة بعد — ستتوفر في مرحلة لاحقة.",
     "publishToPortfolio": "انشر إلى الملف الشخصي (قريبًا)",
     "serialMonitor": "شاشة المنفذ التسلسلي",
     "mobileNotice": "محاكي الدوائر يعمل بشكل أفضل على شاشة أكبر — جرّب فتح هذه الصفحة على حاسوب أو جهاز لوحي.",
     "poweredBy": "بُني هذا المختبر على"
+  },
+  "academy": {
+    "title": "أكاديمية عالم المهندسين",
+    "subtitle": "دورات مصمَّمة للمهندسين والطلاب العرب، مصنّفة حسب التخصص والمستوى.",
+    "empty": "لا توجد دورات منشورة بعد — تابعنا قريبًا.",
+    "notFound": "الدورة غير موجودة، أو لم تُنشر بعد.",
+    "levels": {
+      "beginner": "مبتدئ",
+      "intermediate": "متوسط",
+      "advanced": "متقدم"
+    },
+    "lessonCount": "{count, plural, zero {بدون دروس} one {درس واحد} two {درسان} few {# دروس} many {# درسًا} other {# درس}}",
+    "minutes": "{count} دقيقة",
+    "enroll": "اشترك في الدورة",
+    "enrolling": "جارٍ الاشتراك…",
+    "courseCompleted": "مكتملة",
+    "lessonCompleted": "مكتمل",
+    "markComplete": "وضع علامة مكتمل"
+  },
+  "admin": {
+    "academy": {
+      "title": "إدارة محتوى الأكاديمية",
+      "forbidden": "لا تملك صلاحية الوصول إلى لوحة إدارة المحتوى.",
+      "newCourse": "دورة جديدة",
+      "titleAr": "العنوان (عربي)",
+      "titleEn": "العنوان (إنجليزي)",
+      "summaryAr": "الملخص (عربي)",
+      "summaryEn": "الملخص (إنجليزي)",
+      "disciplineTag": "التخصص",
+      "level": "المستوى",
+      "levels": {
+        "beginner": "مبتدئ",
+        "intermediate": "متوسط",
+        "advanced": "متقدم"
+      },
+      "create": "إنشاء الدورة",
+      "creating": "جارٍ الإنشاء…",
+      "empty": "لا توجد دورات بعد — أنشئ أول دورة أعلاه.",
+      "published": "منشورة",
+      "draft": "مسودة",
+      "publish": "نشر",
+      "unpublish": "إلغاء النشر",
+      "lessonCount": "{count, plural, zero {بدون دروس} one {درس واحد} two {درسان} few {# دروس} many {# درسًا} other {# درس}}",
+      "enrollmentCount": "{count, plural, zero {بدون مشتركين} one {مشترك واحد} two {مشتركان} few {# مشتركين} many {# مشتركًا} other {# مشترك}}",
+      "lessons": "الدروس",
+      "noLessons": "لا توجد دروس بعد.",
+      "addLesson": "إضافة درس",
+      "deleteLesson": "حذف",
+      "contentType": "نوع المحتوى",
+      "contentTypes": {
+        "video": "فيديو",
+        "article": "مقال"
+      },
+      "videoUrl": "رابط الفيديو (قابل للتضمين)",
+      "bodyAr": "المحتوى (عربي)",
+      "bodyEn": "المحتوى (إنجليزي)",
+      "errors": {
+        "generic": "حدث خطأ، حاول مرة أخرى."
+      }
+    }
   }
 }
