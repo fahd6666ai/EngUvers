@@ -43,6 +43,15 @@ erDiagram
     Course ||--o{ CourseEnrollment : "enrolled via"
     Lesson ||--o{ LessonCompletion : "completed via"
     User ||--o{ Book : adds
+    User ||--o{ Exam : authors
+    User ||--o{ ExamAttempt : attempts
+
+    Exam ||--o{ Question : has
+    Question ||--o{ AnswerOption : has
+    Exam ||--o{ ExamAttempt : "attempted via"
+    ExamAttempt ||--o{ AttemptAnswer : has
+    Question ||--o{ AttemptAnswer : "answered via"
+    AnswerOption ||--o{ AttemptAnswer : "selected via"
 
     CircuitProject {
         string name
@@ -82,6 +91,34 @@ erDiagram
         string authorName
         string disciplineTag
         boolean published
+    }
+
+    Exam {
+        string titleAr
+        string titleEn
+        string disciplineTag
+        boolean published
+    }
+
+    Question {
+        string textAr
+        string textEn
+        int order
+        int points
+    }
+
+    AnswerOption {
+        string textAr
+        string textEn
+        boolean isCorrect
+        int order
+    }
+
+    ExamAttempt {
+        datetime startedAt
+        datetime submittedAt
+        int score
+        int totalPoints
     }
 ```
 
@@ -134,3 +171,13 @@ erDiagram
   never returned by the public catalog/detail endpoints — only by the
   entitlement-gated `GET /library/books/:id/access` (`library.books`,
   also granted to `free`) — see `LibraryService`.
+- **`Exam`/`Question`/`AnswerOption`/`ExamAttempt`/`AttemptAnswer`**
+  (added Phase 3, Engineering Exams/EE): multiple-choice, auto-graded —
+  no free-text/AI-graded questions. `ExamAttempt.totalPoints` is
+  snapshotted from the exam's questions at `POST /exams/:id/start` time
+  (entitlement-gated: `exams.full_bank`, also granted to `free`), so a
+  later edit to the question bank never retroactively changes a past
+  attempt's grading. `AttemptAnswer.isCorrect` is computed once, at
+  `POST /exams/attempts/:id/submit` time — grading looks up the selected
+  option within *that question's own* options, so an option id from a
+  different question can't be credited. See `ExamsService`.

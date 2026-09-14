@@ -27,8 +27,13 @@ their own routes when their phase starts — not designed here.
 | `/[locale]/library/[bookId]` | Book detail | ✅ Phase 3 | Public metadata; "Open book" requires login + the `library.books` entitlement (granted to `free`) — fetches the actual link from `GET /library/books/:id/access` and opens it in a new tab |
 | `/[locale]/admin/library` | Content-admin: book list + create | ✅ Phase 3 | Role-gated (`admin`/`instructor`), same shape as `/admin/academy` |
 | `/[locale]/admin/library/[bookId]` | Content-admin: edit book | ✅ Phase 3 | Publish/unpublish toggle, delete |
+| `/[locale]/exams` | Exam catalog | ✅ Phase 3 | Public: `GET /exams` (published only); "your attempts" list below for signed-in users |
+| `/[locale]/exams/[examId]` | Exam detail + take exam | ✅ Phase 3 | Public metadata; "Start exam" requires login + the `exams.full_bank` entitlement (granted to `free`) — the whole start → answer → submit flow happens on this one page, no separate route, since there's no "resume an in-progress attempt" endpoint yet |
+| `/[locale]/exams/attempts/[attemptId]` | Attempt review | ✅ Phase 3 | Owner-only; shows each question, the selected option, and whether it was correct |
+| `/[locale]/admin/exams` | Content-admin: exam list + create | ✅ Phase 3 | Role-gated (`admin`/`instructor`), same shape as `/admin/academy` and `/admin/library` |
+| `/[locale]/admin/exams/[examId]` | Content-admin: edit exam + manage questions | ✅ Phase 3 | Publish/unpublish toggle; add a multiple-choice question (fixed 4 option slots, mark one correct) or delete one — no per-option editing endpoint, delete-and-recreate the question instead |
 
-Not yet mapped (designed at the start of their phase): Engineering Exams
-(EE), Engineering AI (EAI) chat surface, Student Notebook, Engineering
-Portfolio (EP), Engineering Career (EC) + AI interview, project
-marketplace, ISE dashboards, university/enterprise admin consoles.
+Not yet mapped (designed at the start of their phase): Engineering AI
+(EAI) chat surface, Student Notebook, Engineering Portfolio (EP),
+Engineering Career (EC) + AI interview, project marketplace, ISE
+dashboards, university/enterprise admin consoles.

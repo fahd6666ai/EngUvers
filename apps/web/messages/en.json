@@ -104,7 +104,8 @@
     "editProfile": "Edit profile",
     "openLab": "Open Project Lab",
     "openAcademy": "Open Academy",
-    "openLibrary": "Open Library"
+    "openLibrary": "Open Library",
+    "openExams": "Open Exams"
   },
   "lab": {
     "title": "Project Lab",
@@ -149,6 +150,27 @@
     "notFound": "Book not found, or it isn't published yet.",
     "openBook": "Open book",
     "opening": "Opening…",
+    "errors": {
+      "generic": "Something went wrong, please try again."
+    }
+  },
+  "exams": {
+    "title": "Engineering Exams",
+    "subtitle": "Auto-graded multiple-choice exams, organized by discipline.",
+    "empty": "No exams published yet — check back soon.",
+    "notFound": "Exam not found, or it isn't published yet.",
+    "questionCount": "{count, plural, one {# question} other {# questions}}",
+    "startExam": "Start exam",
+    "starting": "Starting…",
+    "submit": "Submit ({answered}/{total} answered)",
+    "submitting": "Submitting…",
+    "resultTitle": "Your result",
+    "correctCount": "{correct} of {total} correct",
+    "myAttempts": "Your attempts",
+    "inProgress": "In progress",
+    "correct": "Correct",
+    "incorrect": "Incorrect",
+    "noAnswer": "Not answered",
     "errors": {
       "generic": "Something went wrong, please try again."
     }
@@ -217,6 +239,40 @@
       "confirmDelete": "Delete this book? This can't be undone.",
       "errors": {
         "generic": "Something went wrong, please try again."
+      }
+    },
+    "exams": {
+      "title": "Exams content admin",
+      "forbidden": "You don't have access to the content-admin panel.",
+      "newExam": "New exam",
+      "titleAr": "Title (Arabic)",
+      "titleEn": "Title (English)",
+      "descriptionAr": "Description (Arabic)",
+      "descriptionEn": "Description (English)",
+      "disciplineTag": "Discipline",
+      "create": "Create exam",
+      "creating": "Creating…",
+      "empty": "No exams yet — create the first one above.",
+      "published": "Published",
+      "draft": "Draft",
+      "publish": "Publish",
+      "unpublish": "Unpublish",
+      "questionCount": "{count, plural, one {# question} other {# questions}}",
+      "attemptCount": "{count, plural, one {# attempt} other {# attempts}}",
+      "questions": "Questions",
+      "noQuestions": "No questions yet.",
+      "addQuestion": "Add question",
+      "deleteQuestion": "Delete",
+      "questionTextAr": "Question text (Arabic)",
+      "questionTextEn": "Question text (English)",
+      "optionsHint": "Mark the correct option, fill at least two.",
+      "correctOption": "Correct",
+      "optionAr": "Option {n} (Arabic)",
+      "optionEn": "Option {n} (English)",
+      "errors": {
+        "generic": "Something went wrong, please try again.",
+        "needTwoOptions": "Fill in at least two options.",
+        "correctOptionEmpty": "The option marked correct can't be empty."
       }
     }
   }

@@ -104,7 +104,8 @@
     "editProfile": "تعديل الملف الشخصي",
     "openLab": "افتح مختبر المشاريع",
     "openAcademy": "افتح الأكاديمية",
-    "openLibrary": "افتح المكتبة"
+    "openLibrary": "افتح المكتبة",
+    "openExams": "افتح الاختبارات"
   },
   "lab": {
     "title": "مختبر المشاريع",
@@ -149,6 +150,27 @@
     "notFound": "الكتاب غير موجود، أو لم يُنشر بعد.",
     "openBook": "فتح الكتاب",
     "opening": "جارٍ الفتح…",
+    "errors": {
+      "generic": "حدث خطأ، حاول مرة أخرى."
+    }
+  },
+  "exams": {
+    "title": "اختبارات عالم المهندسين",
+    "subtitle": "اختبارات اختيار من متعدد، مُصحَّحة آليًا، مصنّفة حسب التخصص.",
+    "empty": "لا توجد اختبارات منشورة بعد — تابعنا قريبًا.",
+    "notFound": "الاختبار غير موجود، أو لم يُنشر بعد.",
+    "questionCount": "{count, plural, zero {بدون أسئلة} one {سؤال واحد} two {سؤالان} few {# أسئلة} many {# سؤالًا} other {# سؤال}}",
+    "startExam": "ابدأ الاختبار",
+    "starting": "جارٍ البدء…",
+    "submit": "إرسال ({answered}/{total} مُجاب)",
+    "submitting": "جارٍ الإرسال…",
+    "resultTitle": "نتيجتك",
+    "correctCount": "{correct} من {total} إجابة صحيحة",
+    "myAttempts": "محاولاتك",
+    "inProgress": "قيد التقدّم",
+    "correct": "صحيحة",
+    "incorrect": "خاطئة",
+    "noAnswer": "لم تُجب",
     "errors": {
       "generic": "حدث خطأ، حاول مرة أخرى."
     }
@@ -217,6 +239,40 @@
       "confirmDelete": "حذف هذا الكتاب؟ لا يمكن التراجع عن هذا الإجراء.",
       "errors": {
         "generic": "حدث خطأ، حاول مرة أخرى."
+      }
+    },
+    "exams": {
+      "title": "إدارة محتوى الاختبارات",
+      "forbidden": "لا تملك صلاحية الوصول إلى لوحة إدارة المحتوى.",
+      "newExam": "اختبار جديد",
+      "titleAr": "العنوان (عربي)",
+      "titleEn": "العنوان (إنجليزي)",
+      "descriptionAr": "الوصف (عربي)",
+      "descriptionEn": "الوصف (إنجليزي)",
+      "disciplineTag": "التخصص",
+      "create": "إنشاء الاختبار",
+      "creating": "جارٍ الإنشاء…",
+      "empty": "لا توجد اختبارات بعد — أنشئ أول اختبار أعلاه.",
+      "published": "منشور",
+      "draft": "مسودة",
+      "publish": "نشر",
+      "unpublish": "إلغاء النشر",
+      "questionCount": "{count, plural, zero {بدون أسئلة} one {سؤال واحد} two {سؤالان} few {# أسئلة} many {# سؤالًا} other {# سؤال}}",
+      "attemptCount": "{count, plural, zero {بدون محاولات} one {محاولة واحدة} two {محاولتان} few {# محاولات} many {# محاولة} other {# محاولة}}",
+      "questions": "الأسئلة",
+      "noQuestions": "لا توجد أسئلة بعد.",
+      "addQuestion": "إضافة سؤال",
+      "deleteQuestion": "حذف",
+      "questionTextAr": "نص السؤال (عربي)",
+      "questionTextEn": "نص السؤال (إنجليزي)",
+      "optionsHint": "حدّد الإجابة الصحيحة، واملأ خيارين على الأقل.",
+      "correctOption": "صحيح",
+      "optionAr": "الخيار {n} (عربي)",
+      "optionEn": "الخيار {n} (إنجليزي)",
+      "errors": {
+        "generic": "حدث خطأ، حاول مرة أخرى.",
+        "needTwoOptions": "املأ خيارين على الأقل.",
+        "correctOptionEmpty": "الخيار المحدد كصحيح لا يمكن أن يكون فارغًا."
       }
     }
   }
