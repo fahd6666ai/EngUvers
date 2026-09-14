@@ -80,6 +80,11 @@ export default function DashboardPage() {
               {t('openAcademy')}
             </Button>
           </Link>
+          <Link href="/exams">
+            <Button size="sm" variant="secondary">
+              {t('openExams')}
+            </Button>
+          </Link>
           <Link href="/lab">
             <Button size="sm">{t('openLab')}</Button>
           </Link>

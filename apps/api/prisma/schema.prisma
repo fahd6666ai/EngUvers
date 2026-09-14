@@ -100,6 +100,8 @@ model User {
   courseEnrollments CourseEnrollment[]
   lessonCompletions LessonCompletion[]
   booksAdded        Book[]             @relation("BookAddedBy")
+  examsAuthored     Exam[]             @relation("ExamAuthor")
+  examAttempts      ExamAttempt[]
 
   @@map("users")
 }
@@ -483,4 +485,92 @@ model Book {
 
   @@index([published, disciplineTag])
   @@map("books")
+}
+
+// Phase 3 — Engineering Exams (EE). Multiple-choice, auto-graded — the
+// brief's "auto-graded tests and challenges" (landing.journey.prove),
+// not free-text/AI-graded (that's a different feature entirely).
+// ExamAttempt.totalPoints is snapshotted at start time from the exam's
+// questions, so a later edit to the question bank never retroactively
+// changes a past attempt's grading. See ExamsService.
+model Exam {
+  id            String   @id @default(cuid())
+  titleAr       String
+  titleEn       String
+  descriptionAr String
+  descriptionEn String
+  disciplineTag String
+  published     Boolean  @default(false)
+  authorId      String
+  author        User     @relation("ExamAuthor", fields: [authorId], references: [id])
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  questions Question[]
+  attempts  ExamAttempt[]
+
+  @@index([published, disciplineTag])
+  @@map("exams")
+}
+
+model Question {
+  id     String @id @default(cuid())
+  examId String
+  exam   Exam   @relation(fields: [examId], references: [id], onDelete: Cascade)
+  textAr String
+  textEn String
+  order  Int
+  points Int    @default(1)
+
+  options        AnswerOption[]
+  attemptAnswers AttemptAnswer[]
+
+  @@unique([examId, order])
+  @@map("exam_questions")
+}
+
+model AnswerOption {
+  id         String   @id @default(cuid())
+  questionId String
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  textAr     String
+  textEn     String
+  isCorrect  Boolean  @default(false)
+  order      Int
+
+  attemptAnswers AttemptAnswer[]
+
+  @@unique([questionId, order])
+  @@map("exam_answer_options")
+}
+
+model ExamAttempt {
+  id          String    @id @default(cuid())
+  examId      String
+  exam        Exam      @relation(fields: [examId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  startedAt   DateTime  @default(now())
+  submittedAt DateTime?
+  score       Int?
+  totalPoints Int
+
+  answers AttemptAnswer[]
+
+  @@index([userId])
+  @@map("exam_attempts")
+}
+
+model AttemptAnswer {
+  id               String        @id @default(cuid())
+  attemptId        String
+  attempt          ExamAttempt   @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  questionId       String
+  question         Question      @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  selectedOptionId String?
+  selectedOption   AnswerOption? @relation(fields: [selectedOptionId], references: [id])
+  isCorrect        Boolean
+
+  @@unique([attemptId, questionId])
+  @@map("exam_attempt_answers")
 }

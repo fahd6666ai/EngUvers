@@ -305,8 +305,70 @@ pnpm db:seed          # prisma db seed (reference data only — see prisma/seed.
   reachable this session). Run it alongside Slice 1's verification
   steps, not separately.
 
-  Not yet built (later Phase 3 slices): Engineering Exams (EE —
-  question banks, auto-graded attempts, `exams.full_bank` entitlement),
-  and any ownership restriction on either content-admin panel
-  (currently any `admin`/`instructor` can edit any course or book, not
-  just their own).
+  **Slice 3 — Engineering Exams (EE)** — multiple-choice, auto-graded
+  exams (the brief's "auto-graded tests and challenges", not free-text/
+  AI-graded — that's a different feature). New models: `Exam` (authored
+  by `admin`/`instructor`, `published` gate), `Question` (ordered,
+  `points`, default 1), `AnswerOption` (exactly one `isCorrect` per
+  question — enforced in `ExamsService.createQuestion`, not the DTO
+  layer), `ExamAttempt` (`totalPoints` snapshotted from the exam's
+  questions at start time, so a later question-bank edit never
+  retroactively changes a past attempt's grading), `AttemptAnswer`
+  (`isCorrect` computed once at submit time, looked up within *that
+  question's own* options only — an option id from a different question
+  can't be credited; covered by a dedicated unit test). API: `exams`
+  module — public catalog (`GET /exams`, `GET /exams/:id`),
+  entitlement-gated (`exams.full_bank`, granted to `free`, same
+  reasoning as the other two features) `POST /exams/:id/start` (returns
+  questions/options with `isCorrect` stripped) and
+  `POST /exams/attempts/:id/submit` (one submit per attempt — a second
+  call is rejected), `GET /exams/me/attempts` and
+  `GET /exams/attempts/:id` (owner-only review), and a role-gated
+  content-admin sub-controller at `/admin/exams` (exam CRUD; questions
+  are created with their options nested in one call — no per-option
+  endpoint, edit a question's options by deleting and recreating it,
+  same "MVP authoring, not a full editorial workflow" call the academy/
+  library admin panels made). `GET /me/dashboard`'s `passedFirstExam` is
+  wired to real `ExamAttempt` data — "passed" means ≥60% of the
+  attempt's `totalPoints` on any submitted attempt, an LMS-default
+  threshold the brief doesn't pin down. Web: `/exams` (catalog + "your
+  attempts"), `/exams/[examId]` (metadata → start → answer → submit,
+  all on one page — no "resume an in-progress attempt" endpoint exists
+  yet, so this doesn't try to survive a refresh mid-attempt),
+  `/exams/attempts/[attemptId]` (review: each question, the answer
+  given, correct or not), `/admin/exams` and `/admin/exams/[examId]`
+  (content-admin: create exams, publish/unpublish, add a question via
+  four fixed option slots with a "mark correct" radio, delete a
+  question).
+
+  Verified the same way as Slices 1-2: lint + typecheck clean, 12 new
+  unit tests in `exams.service.spec.ts` (Prisma mocked) — including the
+  cross-question-option-not-credited and already-submitted cases named
+  above — 63 total passing in `apps/api`. Migration
+  (`prisma/migrations/20260914223000_exams/`) generated the same
+  schema-diff way, same caveat — **not** exercised against a live
+  Postgres, for the same reason (no Docker daemon reachable this
+  session). Run it alongside Slices 1-2's verification steps, not
+  separately — this is also the first slice where getting the grading
+  logic right on a real Postgres (not just the Prisma-mocked unit tests)
+  actually matters: take a seeded exam end-to-end (start → answer a mix
+  of correct/incorrect/unanswered questions → submit → confirm the
+  returned score and the `/admin/exams` attempt count) before trusting
+  it.
+
+  Not yet built: any ownership restriction on the three content-admin
+  panels (currently any `admin`/`instructor` can edit any course, book,
+  or exam, not just their own); a resume-in-progress-attempt endpoint;
+  per-question explanations shown on review. Phase 3 as scoped (EB + EA
+  + EE with a content-admin panel) is now feature-complete pending live-
+  database verification — Engineering AI (EAI), Student Notebook,
+  Engineering Portfolio (EP), Engineering Career (EC), and the rest are
+  later phases per `docs/PAGES.md`.
+
+Next phase to implement: **Phase 4** — Engineering AI (EAI): an AI tutor
+chat surface and `services/ai` (FastAPI, Claude API via `LLMProvider`).
+Blocked on the same deferred input `ise.analysis` already named: an
+`ANTHROPIC_API_KEY` + usage budget/per-tier caps. Once that lands, the
+`IseAnalysisProvider` seam in `apps/api/src/circuit-lab/ise-analysis/`
+is the first thing to wire to a real provider — it was built in Phase 2
+specifically so Phase 4 wouldn't need to touch anything above it.
