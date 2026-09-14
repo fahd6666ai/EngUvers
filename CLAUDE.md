@@ -265,21 +265,14 @@ pnpm db:seed          # prisma db seed (reference data only — see prisma/seed.
   and 15 new unit tests in `academy.service.spec.ts` (Prisma mocked),
   42 total passing in `apps/api` — `dashboard.service.ts`'s
   `completedFirstCourse` wiring has no dedicated test of its own; there
-  was no `dashboard.service.spec.ts` before this phase either. **Not**
-  verified end-to-end against a live stack the way Phases 1-2 were: no
-  Docker daemon was reachable in this session (same restriction as
-  Phase 0/2's image pulls), so there was no Postgres to run
-  `prisma migrate dev`, seed, or click through the catalog/enroll/admin
-  flow against. The migration
-  (`prisma/migrations/20260914213000_academy_courses/`) was instead
-  generated with `prisma migrate diff --from-schema-datamodel
-  --to-schema-datamodel --script` (a schema-to-schema diff, no database
-  required) and reviewed by hand — the same SQL `prisma migrate dev`
-  would have produced, but unexercised against a real Postgres. Running
-  `pnpm db:migrate && pnpm db:seed` then clicking through
-  `/admin/academy` → publish a course → `/academy` → enroll → complete
-  its lessons, on a real dev stack, is the first thing to do before
-  trusting this slice the way Phase 1/2's claims can be trusted.
+  was no `dashboard.service.spec.ts` before this phase either. Migration
+  (`prisma/migrations/20260914213000_academy_courses/`) was generated
+  with `prisma migrate diff --from-schema-datamodel
+  --to-schema-datamodel --script` (schema-to-schema, no database
+  required) and reviewed by hand. **Verified live** in a follow-up
+  session against a real Postgres — see the consolidated live-
+  verification note after Slice 3 for what was actually exercised and
+  how (no Docker involved).
 
   **Slice 2 — Engineering Books (EB)** — a book catalog. New model:
   `Book` (added/edited by `admin`/`instructor`, `published` boolean
@@ -300,10 +293,9 @@ pnpm db:seed          # prisma db seed (reference data only — see prisma/seed.
   Verified the same way as Slice 1: lint + typecheck clean, 9 new unit
   tests in `library.service.spec.ts` (Prisma mocked), 51 total passing
   in `apps/api`. Migration (`prisma/migrations/20260914220000_library_books/`)
-  generated the same schema-diff way, same caveat — **not** exercised
-  against a live Postgres, for the same reason (no Docker daemon
-  reachable this session). Run it alongside Slice 1's verification
-  steps, not separately.
+  generated the same schema-diff way. **Verified live** alongside
+  Slice 1 in the same follow-up session — see the consolidated note
+  after Slice 3.
 
   **Slice 3 — Engineering Exams (EE)** — multiple-choice, auto-graded
   exams (the brief's "auto-graded tests and challenges", not free-text/
@@ -346,22 +338,49 @@ pnpm db:seed          # prisma db seed (reference data only — see prisma/seed.
   cross-question-option-not-credited and already-submitted cases named
   above — 63 total passing in `apps/api`. Migration
   (`prisma/migrations/20260914223000_exams/`) generated the same
-  schema-diff way, same caveat — **not** exercised against a live
-  Postgres, for the same reason (no Docker daemon reachable this
-  session). Run it alongside Slices 1-2's verification steps, not
-  separately — this is also the first slice where getting the grading
-  logic right on a real Postgres (not just the Prisma-mocked unit tests)
-  actually matters: take a seeded exam end-to-end (start → answer a mix
-  of correct/incorrect/unanswered questions → submit → confirm the
-  returned score and the `/admin/exams` attempt count) before trusting
-  it.
+  schema-diff way. **Verified live** alongside Slices 1-2 — see below.
+
+  **Live verification (follow-up session, all three slices together)**
+  — no Docker daemon was reachable in *this* session either, but a
+  local PostgreSQL 16 binary install turned out to already exist at
+  `/usr/lib/postgresql/16/bin` (just not on `PATH` or running); `initdb`
+  + `pg_ctl` under a non-root user brought up a real Postgres with no
+  Docker involved. Against it: `prisma migrate deploy` applied all five
+  migrations cleanly (the three hand-written schema-diff ones included)
+  in one pass; `prisma db seed` ran clean, including the new
+  `academy.courses`/`library.books`/`exams.full_bank` `PlanLimit` rows.
+  With the API running against that database, curl exercised every
+  slice end-to-end as two real users (one promoted to `admin` via a
+  direct SQL update, then re-logged-in for a fresh JWT — role is baked
+  into the token at issue time, not re-read per request): created,
+  published, and browsed a course/book/exam through the real
+  content-admin routes; enrolled, completed a lesson, and watched
+  `completedFirstCourse` flip to `true` on `GET /me/dashboard`; fetched
+  a book's `fileUrl` only through the gated `/access` route (confirmed
+  absent from the public catalog/detail responses); started an exam
+  attempt (confirmed `isCorrect` is never present in that payload),
+  submitted a mixed-correctness answer set and got back the exact
+  expected score, then confirmed a second submit on the same attempt is
+  rejected (400) and that **an option id from one question submitted
+  against a different question is not credited** — the specific
+  adversarial case the unit tests assert in isolation, now confirmed
+  against real grading code end-to-end. Also confirmed: an unpublished
+  exam 404s from both the public detail route and `/start` for an
+  entitled student while remaining visible via `/admin/exams/:id`; a
+  non-owner (including an admin) gets 404 reading someone else's
+  attempt via `GET /exams/attempts/:id`; a student gets 403 from every
+  `/admin/*` route; `POST /circuit-projects/:id/explain` still honestly
+  403s (`ise.analysis` has no `PlanLimit` row, by design — Phase 4).
+  Every result matched what the unit tests and the code predicted — no
+  bugs found. The database and API process were torn down after; this
+  was local, throwaway verification, not a deployment.
 
   Not yet built: any ownership restriction on the three content-admin
   panels (currently any `admin`/`instructor` can edit any course, book,
   or exam, not just their own); a resume-in-progress-attempt endpoint;
   per-question explanations shown on review. Phase 3 as scoped (EB + EA
-  + EE with a content-admin panel) is now feature-complete pending live-
-  database verification — Engineering AI (EAI), Student Notebook,
+  + EE with a content-admin panel) is feature-complete and now verified
+  live, not just unit-tested — Engineering AI (EAI), Student Notebook,
   Engineering Portfolio (EP), Engineering Career (EC), and the rest are
   later phases per `docs/PAGES.md`.
 
