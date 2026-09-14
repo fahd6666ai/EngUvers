@@ -42,6 +42,7 @@ erDiagram
     Course ||--o{ Lesson : has
     Course ||--o{ CourseEnrollment : "enrolled via"
     Lesson ||--o{ LessonCompletion : "completed via"
+    User ||--o{ Book : adds
 
     CircuitProject {
         string name
@@ -73,6 +74,14 @@ erDiagram
     CourseEnrollment {
         datetime enrolledAt
         datetime completedAt
+    }
+
+    Book {
+        string titleAr
+        string titleEn
+        string authorName
+        string disciplineTag
+        boolean published
     }
 ```
 
@@ -120,3 +129,8 @@ erDiagram
   `prisma/seed.ts` (unlike `ise.analysis`, this feature has no missing
   external dependency, so it isn't left ungated). No quiz/exam model yet
   — that's EE, a later Phase 3 slice.
+- **`Book`** (added Phase 3, Engineering Books/EB): a flat catalog, no
+  lessons/enrollment the way courses have. `fileUrl` is deliberately
+  never returned by the public catalog/detail endpoints — only by the
+  entitlement-gated `GET /library/books/:id/access` (`library.books`,
+  also granted to `free`) — see `LibraryService`.

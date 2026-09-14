@@ -237,8 +237,9 @@ pnpm db:seed          # prisma db seed (reference data only — see prisma/seed.
     validated natively instead. Should build fine wherever Docker Hub is
     reachable.
 
-- **Phase 3 (current) — first slice: Engineering Academy (EA)** —
-  courses. New models: `Course` (authored by `admin`/`instructor`,
+- **Phase 3 (current)**
+
+  **Slice 1 — Engineering Academy (EA)** — courses. New models: `Course` (authored by `admin`/`instructor`,
   `published` boolean gate), `Lesson` (`video` or `article`, ordered
   within its course), `CourseEnrollment` (`completedAt` stamped once
   every lesson has a matching completion), `LessonCompletion`. API:
@@ -280,8 +281,32 @@ pnpm db:seed          # prisma db seed (reference data only — see prisma/seed.
   its lessons, on a real dev stack, is the first thing to do before
   trusting this slice the way Phase 1/2's claims can be trusted.
 
-  Not yet built (later Phase 3 slices): Engineering Books (EB —
-  book/reading-material catalog), Engineering Exams (EE — question
-  banks, auto-graded attempts, `exams.full_bank` entitlement), and any
-  ownership restriction on the content-admin panel (currently any
-  `admin`/`instructor` can edit any course, not just their own).
+  **Slice 2 — Engineering Books (EB)** — a book catalog. New model:
+  `Book` (added/edited by `admin`/`instructor`, `published` boolean
+  gate) — a flat catalog, no lessons/enrollment the way `Course` has.
+  API: `library` module — public catalog (`GET /library/books`,
+  `GET /library/books/:id`, metadata only — `fileUrl` is never
+  returned here), an entitlement-gated (`library.books`, granted to
+  `free`, same reasoning as `academy.courses`)
+  `GET /library/books/:id/access` that's the only place `fileUrl` is
+  ever returned (mirrors `CircuitLabService.issueSessionToken`'s
+  "gate the resource behind its own endpoint" shape), and a role-gated
+  content-admin sub-controller at `/admin/library` for book CRUD. Web:
+  `/library` (catalog), `/library/[bookId]` (metadata + a gated "Open
+  book" button that fetches the link and opens it in a new tab),
+  `/admin/library` and `/admin/library/[bookId]` (content-admin: add
+  books, publish/unpublish, delete).
+
+  Verified the same way as Slice 1: lint + typecheck clean, 9 new unit
+  tests in `library.service.spec.ts` (Prisma mocked), 51 total passing
+  in `apps/api`. Migration (`prisma/migrations/20260914220000_library_books/`)
+  generated the same schema-diff way, same caveat — **not** exercised
+  against a live Postgres, for the same reason (no Docker daemon
+  reachable this session). Run it alongside Slice 1's verification
+  steps, not separately.
+
+  Not yet built (later Phase 3 slices): Engineering Exams (EE —
+  question banks, auto-graded attempts, `exams.full_bank` entitlement),
+  and any ownership restriction on either content-admin panel
+  (currently any `admin`/`instructor` can edit any course or book, not
+  just their own).
