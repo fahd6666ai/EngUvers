@@ -28,6 +28,13 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile=false
 
+      # Typecheck (and test, via ts-jest) needs the real Prisma Client —
+      # generated from prisma/schema.prisma — not the empty stub
+      # @prisma/client's own postinstall falls back to when it can't find
+      # the schema in a default location.
+      - name: Generate Prisma Client
+        run: pnpm db:generate
+
       - name: Lint
         run: pnpm lint
 
