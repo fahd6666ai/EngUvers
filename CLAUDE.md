@@ -24,7 +24,7 @@ enguvers/
 │   ├── api/           NestJS + Prisma + PostgreSQL + Redis (BullMQ from Phase 2+)
 │   └── mobile/        placeholder — Phase 8
 ├── services/
-│   ├── ai/            placeholder — Phase 4 (FastAPI, Claude API via LLMProvider)
+│   ├── ai/            FastAPI, Claude API via LLMProvider (Phase 4) — see its own README.md
 │   └── simulator/      Circuit Lab (Velxio, Phase 2) — see its own README.md
 ├── packages/
 │   ├── config/        shared eslint / tsconfig / tailwind preset
@@ -384,10 +384,44 @@ pnpm db:seed          # prisma db seed (reference data only — see prisma/seed.
   Engineering Portfolio (EP), Engineering Career (EC), and the rest are
   later phases per `docs/PAGES.md`.
 
-Next phase to implement: **Phase 4** — Engineering AI (EAI): an AI tutor
-chat surface and `services/ai` (FastAPI, Claude API via `LLMProvider`).
-Blocked on the same deferred input `ise.analysis` already named: an
-`ANTHROPIC_API_KEY` + usage budget/per-tier caps. Once that lands, the
-`IseAnalysisProvider` seam in `apps/api/src/circuit-lab/ise-analysis/`
-is the first thing to wire to a real provider — it was built in Phase 2
-specifically so Phase 4 wouldn't need to touch anything above it.
+- **Phase 4 (current) — `services/ai` scaffolding only.** A standalone
+  FastAPI service, not a `apps/api` module — it trusts the same JWTs
+  `apps/api` issues (HS256, shared `JWT_SECRET`, `sub` claim) rather than
+  running a second auth system, and sits behind `apps/api`'s
+  `EntitlementsGuard` as a resource server, not a second entitlement
+  system. Built: `LLMProvider` (`app/llm/provider.py`) — the same
+  swappable-provider shape as `OtpProvider`/`IseAnalysisProvider`:
+  `ClaudeProvider` (real, Anthropic SDK — refuses to guess a model, so
+  `ANTHROPIC_MODEL` is required alongside `ANTHROPIC_API_KEY` or
+  `build_llm_provider` raises) and `UnavailableLLMProvider` (the
+  dev-mode default while neither is set — every LLM-backed route
+  honestly 503s, same as `UnavailableIseAnalysisProvider`). One real
+  route, `POST /ise/explain`, returning `{ summary }` — the exact shape
+  `apps/api`'s `IseAnalysisProvider` (Phase 2) already expects, and the
+  concrete target for swapping that provider once this service can
+  answer for real. `docker-compose.yml` gained the `ai` service entry
+  the Phase 0 plan and this file's earlier note both said would land
+  here; root/`services/ai/.env.example` document `AI_PORT`,
+  `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL`.
+
+  Verified live: booted a real `uvicorn` process and hit it over real
+  HTTP (not just FastAPI's in-process `TestClient`) — `GET /health` 200s;
+  `POST /ise/explain` 401s with no/malformed/wrong-signature tokens and
+  503s (with `UnavailableLLMProvider`'s exact message) with a valid token
+  and no `ANTHROPIC_API_KEY` configured. 12 `pytest` tests cover the same
+  cases plus `build_llm_provider`'s selection logic in isolation.
+  `docker compose config` validates the new service block cleanly.
+  **Not** verified: an actual `ClaudeProvider` call against the real
+  Anthropic API (no key exists yet), or `apps/api` actually calling this
+  service (that wiring isn't built — see below), or the Docker build
+  itself (needs `python:3.12-slim` from Docker Hub, same restriction
+  noted for other services in this file).
+
+  Still blocked on the deferred input this file has named since Phase 0:
+  an `ANTHROPIC_API_KEY` + `ANTHROPIC_MODEL` + an agreed usage budget /
+  per-plan caps. Not yet built, and not blocked on the key — just not
+  done yet: wiring `apps/api`'s `IseAnalysisProvider` to actually call
+  `POST /ise/explain` (the other half of "swap the provider"); the
+  Student Notebook pipeline; the AI tutor chat surface; streaming
+  responses; per-user usage/cost logging. See `services/ai/README.md`
+  for the full breakdown.

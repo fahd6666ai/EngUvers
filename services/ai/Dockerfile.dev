@@ -1,0 +1,13 @@
+# Dev-only image. Unlike apps/api's Dockerfile.dev, this doesn't need the
+# whole pnpm workspace — services/ai is a standalone Python service, so
+# the build context is services/ai itself (see docker-compose.yml).
+FROM python:3.12-slim
+
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY . .
+
+EXPOSE 4100
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "4100", "--reload"]
