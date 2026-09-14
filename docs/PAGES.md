@@ -23,9 +23,12 @@ their own routes when their phase starts — not designed here.
 | `/[locale]/academy/[courseId]` | Course detail | ✅ Phase 3 | Public course/lesson browsing; enroll and mark-lesson-complete require login + the `academy.courses` entitlement (granted to `free` on signup) |
 | `/[locale]/admin/academy` | Content-admin: course list + create | ✅ Phase 3 | Role-gated (`admin`/`instructor`) via `RolesGuard`; client-side role check is UX only, same as the auth-cookie pattern in `middleware.ts` — the API's `RolesGuard` is the real boundary |
 | `/[locale]/admin/academy/[courseId]` | Content-admin: edit course + manage lessons | ✅ Phase 3 | Publish/unpublish toggle, add/delete lessons (video or article) |
+| `/[locale]/library` | Book catalog | ✅ Phase 3 | Public: `GET /library/books` (published only); catalog/detail never expose `fileUrl` |
+| `/[locale]/library/[bookId]` | Book detail | ✅ Phase 3 | Public metadata; "Open book" requires login + the `library.books` entitlement (granted to `free`) — fetches the actual link from `GET /library/books/:id/access` and opens it in a new tab |
+| `/[locale]/admin/library` | Content-admin: book list + create | ✅ Phase 3 | Role-gated (`admin`/`instructor`), same shape as `/admin/academy` |
+| `/[locale]/admin/library/[bookId]` | Content-admin: edit book | ✅ Phase 3 | Publish/unpublish toggle, delete |
 
-Not yet mapped (designed at the start of their phase): Engineering Books
-(EB), Engineering Exams (EE), Engineering AI (EAI) chat surface, Student
-Notebook, Engineering Portfolio (EP), Engineering Career (EC) + AI
-interview, project marketplace, ISE dashboards, university/enterprise
-admin consoles.
+Not yet mapped (designed at the start of their phase): Engineering Exams
+(EE), Engineering AI (EAI) chat surface, Student Notebook, Engineering
+Portfolio (EP), Engineering Career (EC) + AI interview, project
+marketplace, ISE dashboards, university/enterprise admin consoles.

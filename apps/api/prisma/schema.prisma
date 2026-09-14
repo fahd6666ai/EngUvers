@@ -99,6 +99,7 @@ model User {
   coursesAuthored   Course[]           @relation("CourseAuthor")
   courseEnrollments CourseEnrollment[]
   lessonCompletions LessonCompletion[]
+  booksAdded        Book[]             @relation("BookAddedBy")
 
   @@map("users")
 }
@@ -456,4 +457,30 @@ model LessonCompletion {
 
   @@unique([userId, lessonId])
   @@map("lesson_completions")
+}
+
+// Phase 3 — Engineering Books (EB). Simpler than Course: a flat catalog,
+// no lessons/enrollment. `fileUrl` is deliberately never returned by the
+// public catalog/detail endpoints — only by the entitlement-gated
+// `GET /library/books/:id/access` (same "hide the resource behind a
+// dedicated gated endpoint, not a field filter" shape as
+// CircuitLabService.issueSessionToken) — see LibraryService.
+model Book {
+  id            String   @id @default(cuid())
+  titleAr       String
+  titleEn       String
+  authorName    String
+  descriptionAr String
+  descriptionEn String
+  disciplineTag String
+  coverImageUrl String?
+  fileUrl       String
+  published     Boolean  @default(false)
+  addedById     String
+  addedBy       User     @relation("BookAddedBy", fields: [addedById], references: [id])
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([published, disciplineTag])
+  @@map("books")
 }

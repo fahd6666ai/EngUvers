@@ -24,6 +24,7 @@ export type EntitlementFeature =
   | 'circuit_lab.esp32'
   | 'circuit_lab.electrical_sim'
   | 'academy.courses'
+  | 'library.books'
   | 'exams.full_bank'
   | 'ai.tutor'
   | 'ise.analysis'

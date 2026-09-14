@@ -70,6 +70,11 @@ export default function DashboardPage() {
         <div className="flex items-center gap-3">
           <span className="text-sm text-slate-500">{t('yourPlan')}</span>
           <Badge variant="brand">{planCode}</Badge>
+          <Link href="/library">
+            <Button size="sm" variant="secondary">
+              {t('openLibrary')}
+            </Button>
+          </Link>
           <Link href="/academy">
             <Button size="sm" variant="secondary">
               {t('openAcademy')}

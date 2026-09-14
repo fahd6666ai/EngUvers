@@ -89,6 +89,7 @@ const ENGINEERING_FACULTY = { nameAr: 'كلية الهندسة', nameEn: 'Colleg
 // feature needs the same treatment.
 const PLAN_LIMITS: { planCode: (typeof PLANS)[number]['code']; feature: string; dailyQuota: number | null }[] = [
   { planCode: 'free', feature: 'academy.courses', dailyQuota: null },
+  { planCode: 'free', feature: 'library.books', dailyQuota: null },
 ];
 
 // The disciplines from the brief's product definition (§1) — generic,
