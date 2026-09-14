@@ -1,9 +1,14 @@
-import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import type { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { buildStarterVlxContent } from './starter-project';
 import type { UpdateProjectDto } from './dto/update-project.dto';
+import {
+  ISE_ANALYSIS_PROVIDER,
+  type IseAnalysisProvider,
+  type IseAnalysisResult,
+} from './ise-analysis/ise-analysis-provider.interface';
 
 const SESSION_TOKEN_TTL = '1h';
 
@@ -12,6 +17,7 @@ export class CircuitLabService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly jwt: JwtService,
+    @Inject(ISE_ANALYSIS_PROVIDER) private readonly iseAnalysis: IseAnalysisProvider,
   ) {}
 
   listMine(ownerId: string) {
@@ -66,5 +72,16 @@ export class CircuitLabService {
         { expiresIn: SESSION_TOKEN_TTL },
       ),
     };
+  }
+
+  /**
+   * Gated behind the `ise.analysis` entitlement at the controller — see
+   * ise-analysis/ise-analysis-provider.interface.ts. Delegates entirely to
+   * the injected provider, which is UnavailableIseAnalysisProvider until
+   * Phase 4 wires up a real one.
+   */
+  async explainProject(id: string, ownerId: string): Promise<IseAnalysisResult> {
+    const project = await this.findOneOwned(id, ownerId);
+    return this.iseAnalysis.explainProject(project.vlxContent);
   }
 }

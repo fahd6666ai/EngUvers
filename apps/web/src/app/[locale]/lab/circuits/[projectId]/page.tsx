@@ -38,6 +38,8 @@ export default function CircuitLabPage() {
   const [running, setRunning] = useState(false);
   const [serialOutput, setSerialOutput] = useState('');
   const [notFound, setNotFound] = useState(false);
+  const [explainState, setExplainState] = useState<'idle' | 'loading' | 'unavailable'>('idle');
+  const [explainSummary, setExplainSummary] = useState<string | null>(null);
 
   useEffect(() => {
     if (!getToken()) {
@@ -73,6 +75,24 @@ export default function CircuitLabPage() {
     },
     [projectId],
   );
+
+  const explainProject = useCallback(() => {
+    setExplainState('loading');
+    // The endpoint is real and entitlement-gated (ise.analysis), but the
+    // provider behind it is UnavailableIseAnalysisProvider until Phase 4
+    // wires up services/ai + an Anthropic API key — see
+    // apps/api/src/circuit-lab/ise-analysis/. A 403 means the plan doesn't
+    // grant the feature; anything else (503 today) means it isn't built yet.
+    apiClient
+      .post<{ summary: string }>(`/circuit-projects/${projectId}/explain`)
+      .then((result) => {
+        setExplainSummary(result.summary);
+        setExplainState('idle');
+      })
+      .catch(() => {
+        setExplainState('unavailable');
+      });
+  }, [projectId]);
 
   useEffect(() => {
     function handleMessage(event: MessageEvent) {
@@ -152,9 +172,19 @@ export default function CircuitLabPage() {
           </Badge>
         </div>
 
-        <Button variant="secondary" disabled title="Coming in a later phase (Engineering AI)">
-          {t('explainError')}
-        </Button>
+        <div className="flex flex-col gap-1">
+          <Button
+            variant="secondary"
+            disabled={explainState === 'loading'}
+            onClick={explainProject}
+          >
+            {explainState === 'loading' ? t('explainLoading') : t('explainProject')}
+          </Button>
+          {explainState === 'unavailable' && (
+            <p className="text-xs text-slate-400">{t('explainUnavailable')}</p>
+          )}
+          {explainSummary && <p className="text-xs text-slate-500">{explainSummary}</p>}
+        </div>
         <Button variant="secondary" disabled title="Coming in a later phase (Portfolio)">
           {t('publishToPortfolio')}
         </Button>

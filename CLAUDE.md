@@ -121,7 +121,14 @@ pnpm db:seed          # prisma db seed (reference data only — see prisma/seed.
   shape the plan calls for with `LLMProvider`/`PaymentProvider` — a DI
   token + interface, with a dev-mode default (`ConsoleOtpProvider`, logs
   the code) swapped for a real SMS gateway adapter later without touching
-  `AuthService`.
+  `AuthService`. `IseAnalysisProvider`
+  (`apps/api/src/circuit-lab/ise-analysis/`) is the first real
+  `LLMProvider`-shaped seam: same DI token + interface shape, with
+  `UnavailableIseAnalysisProvider` as the placeholder default (throws a
+  clear 503 instead of fabricating an explanation) until `services/ai` and
+  an `ANTHROPIC_API_KEY` exist in Phase 4 — swap the provider then, nothing
+  above the seam (`CircuitLabService.explainProject`, the `ise.analysis`
+  entitlement gate, the web "Explain my project" button) changes.
 - **Web ↔ API auth boundary**: the JWT lives in `localStorage` + a plain
   (non-httpOnly) cookie (`apps/web/src/lib/auth-token.ts`); `middleware.ts`
   checks the cookie's presence only, to redirect an unauthenticated
@@ -218,6 +225,13 @@ pnpm db:seed          # prisma db seed (reference data only — see prisma/seed.
   - No ESP32/Pi boards, no compile-quota enforcement (no `circuit_lab.*`
     `PlanLimit` row exists yet — seeded when a paid tier actually needs
     one).
+  - `POST /circuit-projects/:id/explain` ("Explain my project", the
+    `ise.analysis`-gated Engineering AI feature) is wired end-to-end —
+    entitlement guard, service method, web button — but delegates to
+    `UnavailableIseAnalysisProvider`, which always throws 503: no
+    `ise.analysis` `PlanLimit` row exists yet, and there's no real provider
+    until Phase 4 brings `services/ai` + an `ANTHROPIC_API_KEY`. See the
+    Swappable provider pattern decision above.
   - Docker Hub base-image pulls (`node:20-slim`, `python:3.12-slim`) are
     blocked in this sandbox; the Dockerfile's individual steps were all
     validated natively instead. Should build fine wherever Docker Hub is
